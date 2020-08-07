@@ -1,8 +1,8 @@
-![WilliHaveASnowday Logo](src/assets/img/logo_256.png)
+![WilliHaveASnowDay Logo](src/assets/img/logo_256.webp)
 
-# WilliHaveASnowday
+# Will I Have A Snow Day
 
-> A website that predicts the chance of a snowday automatically by using AI and machine learning.
+> A website that predicts the chance of a snow day automatically by using AI and machine learning.
 
 The AI model is written with [scikit-learn](https://scikit-learn.org/) and [fast.ai](https://docs.fast.ai/), the backend is [flask](http://flask.pocoo.org/) (and gunicorn server for production), and the frontend uses [Materialize.css](https://materializecss.com/).
 

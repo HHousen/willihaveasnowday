@@ -63,7 +63,7 @@ def send_follow_up_emails():
     email.send(
         recipient=None,
         personalizations=to_emails,
-        subject="Was our prediction right? - WillIHaveASnowday.com",
+        subject="Was our prediction right? - WillIHaveASnowDay.com",
         body=html,
         from_email=From(email=current_app.config['DEFAULT_FROM_EMAIL'], name="Help Improve @ WilliHaveASnowDay.com"),
         sendgrid_only=True
@@ -88,7 +88,7 @@ def index():
     predict_form = predict_forms.Predict()
     help_form = help_forms.Help()
     
-    return render_template('index.html', predict_form=predict_form, help_form=help_form, signed_in=current_user.is_authenticated, title='Home')
+    return render_template('index.html', predict_form=predict_form, help_form=help_form, signed_in=current_user.is_authenticated)
 
 @mainbp.route('/about')
 def about():

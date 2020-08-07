@@ -6,8 +6,9 @@
 	<meta charset="utf-8">
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-
-	<title>{{ title }} - Will I Have A Snowday?</title>
+	{% if title %}
+		<title>{{ title }} - Will I Have A Snow Day?</title>
+	{% endif %}
 	<link rel="shortcut icon" href="{{ url_for('static', filename='img/favicon.png') }}">
 
 	<!-- Materialize.css Icons -->

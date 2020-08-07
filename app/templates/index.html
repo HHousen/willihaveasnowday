@@ -2,6 +2,24 @@
 
 {% block head %}
 {{ super() }}
+<!-- Primary Meta Tags -->
+<title>Will I Have A Snow Day — AI-powered snow day predictor</title>
+<meta name="title" content="Will I Have A Snow Day — AI-powered snow day predictor">
+<meta name="description" content="The most powerful snow day predictor. With just your zip code, our advanced AI algorithm will calculate your chance of having a snow day.">
+
+<!-- Open Graph / Facebook -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://willihaveasnowday.com/">
+<meta property="og:title" content="Will I Have A Snow Day — AI-powered snow day predictor">
+<meta property="og:description" content="The most powerful snow day predictor. With just your zip code, our advanced AI algorithm will calculate your chance of having a snow day.">
+<meta property="og:image" content="{{ url_for('static', filename='img/social.webp') }}">
+
+<!-- Twitter -->
+<meta property="twitter:card" content="summary_large_image">
+<meta property="twitter:url" content="https://willihaveasnowday.com/">
+<meta property="twitter:title" content="Will I Have A Snow Day — AI-powered snow day predictor">
+<meta property="twitter:description" content="The most powerful snow day predictor. With just your zip code, our advanced AI algorithm will calculate your chance of having a snow day.">
+<meta property="twitter:image" content="{{ url_for('static', filename='img/social.webp') }}">
 <script data-ad-client="ca-pub-5688177144759966" async
 	src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
 <style>
@@ -80,13 +98,13 @@
 		<div id="predict-panel">
 			<div class="row center valign-wrapper-med-up">
 				<div class="col s12 m12 l3">
-					<img class="responsive-img" src="{{ url_for('static', filename='img/logo_256.png') }}"
+					<img class="responsive-img" src="{{ url_for('static', filename='img/logo_256.webp') }}"
 						alt="Snowflake Logo">
 				</div>
 				<div class="col s12 m12 l9">
 					<div class="row">
 						<h5 class="header light" style="color: rgba(255,255,255,.9);">Use your zipcode to automatically
-							calculate your chance of having a snowday using AI & Machine Learning</h5>
+							calculate your chance of having a snow day using AI & Machine Learning</h5>
 					</div>
 
 					<div id="box" class="z-depth-1 grey lighten-4 row">
@@ -163,7 +181,7 @@
 									<text x="18" y="20.35" class="percentage">Loading</text>
 								</svg>
 								<span class="card-title">Loading...</span>
-								<p><strong id="day-0-percentage-text">Loading</strong>% chance of a snowday.</p>
+								<p><strong id="day-0-percentage-text">Loading</strong>% chance of a snow day.</p>
 								<p id="day-0-text">Loading...</p>
 							</div>
 						</div>
@@ -181,7 +199,7 @@
 									<text x="18" y="20.35" class="percentage">Loading</text>
 								</svg>
 								<span class="card-title">Loading...</span>
-								<p><strong id="day-1-percentage-text">Loading</strong>% chance of a snowday.</p>
+								<p><strong id="day-1-percentage-text">Loading</strong>% chance of a snow day.</p>
 								<p id="day-1-text">Loading...</p>
 							</div>
 						</div>
@@ -199,7 +217,7 @@
 									<text x="18" y="20.35" class="percentage">Loading</text>
 								</svg>
 								<span class="card-title">Loading...</span>
-								<p><strong id="day-2-percentage-text">Loading</strong>% chance of a snowday.</p>
+								<p><strong id="day-2-percentage-text">Loading</strong>% chance of a snow day.</p>
 								<p id="day-2-text">Loading...</p>
 							</div>
 						</div>
@@ -214,21 +232,21 @@
 	<div class="modal-content">
 		<h4>Help Improve The AI Predictions</h4>
 		{% if signed_in %}
-		<p>Since you are signed into an account we will follow up with you at 4:00pm the day of the predicted snowday
+		<p>Since you are signed into an account we will follow up with you at 4:00pm the day of the predicted snow day
 			regarding every unique prediction you make. All you have to do is press one button in the email: "Yes I had
-			a snowday" or "No I did not have a snowday".</p>
+			a snow day" or "No I did not have a snow day".</p>
 		<p>A unique prediction means each zip code. You will only be emailed once if you make several predictions for
 			the same zip code.</p>
 		<p>Additionally, since you are signed in, you can track your contributions and see how you compare to others on
 			the <a href="{{ url_for('mainbp.leaderboard') }}">leaderboard</a>.</p>
 		{% else %}
 		<p>Our AI is trained on decades of data. However, this data is far from complete. There are thousands of schools
-			that we have no snowday data for.</p>
+			that we have no snow day data for.</p>
 		<p>Every prediction made has the potential to improve all future predictions. All we need is one crucial piece
 			of information: whether or not you actually had a snow day.</p>
 		<p>Enter your email in the box below and we will follow up with you about this prediction at 4:00pm the day of
-			the predicted snowday. All you have to do is press one button in the email: "Yes I had a snowday" or "No I
-			did not have a snowday".</p>
+			the predicted snow day. All you have to do is press one button in the email: "Yes I had a snow day" or "No I
+			did not have a snow day".</p>
 
 		<form id="help-form" action="/help-improve" method="post">
 			<div class='row'>

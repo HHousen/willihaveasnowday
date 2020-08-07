@@ -1,0 +1,54 @@
+{% extends "user/signup-layout.html" %}
+
+{% block head %}
+	{{ super() }}
+	<style>
+		.row {
+			margin-bottom: 0px;
+		}
+	</style>
+{% endblock %}
+
+{% block content %}
+	<div id="outer" class="container">
+		<h4 class="white-text">Sign Up</h4>
+		<div id="box" class="z-depth-1 grey lighten-4 row" style="max-width: 500px;margin-bottom:20px;">
+			<form class="col s12" action="/user/signup" method="post">
+				<div class='row'>
+					<div class='input-field col s6'>
+						{{ m.render_field(form.first_name) }}
+					</div>
+					<div class='input-field col s6'>
+						{{ m.render_field(form.last_name) }}
+					</div>
+				</div>
+				<div class='row'>
+					<div class='input-field col s12'>
+						{{ m.render_field(form.phone) }}
+					</div>
+				</div>
+				<div class='row'>
+					<div class='input-field col s12'>
+						{{ m.render_field(form.email) }}
+					</div>
+				</div>
+				<div class='row'>
+					<div class='input-field col s12'>
+						{{ m.render_field(form.password) }}
+					</div>
+				</div>
+				<div class='row'>
+					<div class='input-field col s12'>
+						{{ m.render_field(form.confirm) }}
+					</div>
+				</div>
+				
+				<div class='row' style="margin-bottom: 20px">
+					<button type='submit' class='col s12 btn btn-large waves-effect'>Sign Up</button>
+				</div>
+				{{ form.csrf_token }}
+			</form>
+		</div>
+		<a href="/user/signin">Already have an account?</a>
+	</div>
+{% endblock %}

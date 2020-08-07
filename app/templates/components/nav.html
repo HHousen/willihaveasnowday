@@ -1,0 +1,44 @@
+<!-- Navbar -->
+{% if current_user.is_authenticated %}
+    <ul id="dropdown-account" class="dropdown-content">
+        <li><a href="/user/account">My Account</a></li>
+        <li><a href="/user/signout">Sign Out</a></li>
+        {{ m.nav_link('userbp.pay', 'Pay') }}
+    </ul>
+{% endif %}
+<ul class="sidenav" id="nav-mobile">
+    {{ m.nav_link('mainbp.about', 'About') }}
+    {{ m.nav_link('mainbp.leaderboard', 'Leaderboard') }}
+    {{ m.nav_link('mainbp.contact', 'Contact') }}
+    {% if current_user.is_authenticated %}
+        <li><a href="/user/account">My Account</a></li>
+        <li><a href="/user/signout">Sign Out</a></li>
+        {{ m.nav_link('userbp.pay', 'Pay') }}
+    {% else %}
+        <li><a href="/user/signin">Sign In</a></li>
+        <li><a href="/user/signup">Sign Up</a></li>
+    {% endif %}
+</ul>
+<div class="navbar-fixed">
+<nav class="red darken-3" role="navigation">
+    <div class="progress" style="position: absolute;margin: 0;border-radius: 0;background-color: rgba(0,0,0,0);">
+        <div id="nav-progress-bar" class="determinate light-blue lighten-3" style="display:none;"></div>
+    </div>
+<div class="nav-wrapper container">
+    <a id="logo-container" href="/" class="brand-logo hide-on-small-only">Will I Have A Snowday?</a>
+    <a id="logo-container" href="/" class="brand-logo hide-on-med-and-up", style="font-size: 20px">Will I Have A Snowday?</a>
+    <a href="#" data-target="nav-mobile" class="sidenav-trigger"><i class="material-icons">menu</i></a>
+    <ul class="right hide-on-med-and-down">
+        {{ m.nav_link('mainbp.about', 'About') }}
+        {{ m.nav_link('mainbp.leaderboard', 'Leaderboard') }}
+        {{ m.nav_link('mainbp.contact', 'Contact') }}
+        {% if current_user.is_authenticated %}
+            <li><a class="dropdown-trigger" href="#" data-target="dropdown-account">{{ current_user.first_name }}<i class="material-icons right">settings</i></a></li>
+        {% else %}
+            <li><a href="/user/signin">Sign In</a></li>
+            <li><a href="/user/signup">Sign Up</a></li>
+        {% endif %}
+    </ul>
+</div>
+</nav>
+</div>

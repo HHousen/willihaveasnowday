@@ -1,0 +1,34 @@
+{% extends "user/signup-layout.html" %}
+
+{% block content %}
+	<div id="outer" class="container">
+		<h4 class="white-text">Login To Your Account</h4>
+		<div id="box" class="z-depth-1 grey lighten-4 row">
+
+		<form class="col s12" action="/user/signin" method="post">
+			<div class='row'>
+				<div class='input-field col s12'>
+					{{ m.render_field(form.email) }}
+				</div>
+			</div>
+
+			<div class='row'>
+				<div class='input-field col s12'>
+					{{ m.render_field(form.password) }}
+				</div>
+
+				<label style='float: right;'>
+					<a class='red-text text-darken-1' href='/user/forgot'><b>Forgot Password?</b></a>
+				</label>
+			</div>
+
+			<br/>
+			<div class='row'>
+				<button type='submit' name='btn_login' class='col s12 btn btn-large waves-effect'>Login</button>
+			</div>
+			{{ form.csrf_token }}
+		</form>
+		</div>
+		<a href="/user/signup">Create account</a>
+	</div>
+{% endblock %}

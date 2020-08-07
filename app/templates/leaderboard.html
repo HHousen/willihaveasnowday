@@ -1,0 +1,20 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container">
+    <h1 class="center">Leaderboard</h1>
+    <p>This page highlights the top 50 users who have contributed the most to improving the snowday prediction AI.</p>
+    <p>Each point corresponds to one entry of whether our prediction was correct.</p>
+
+    <ul class="collection">
+        {% for user, points, avatar in users %}
+        <li class="collection-item avatar">
+            <img src="{{ avatar }}" alt="User profile picture" class="circle">
+            <span class="title">{{ user }}</span>
+            <p>Points: {{ points }}</p>
+            <!-- <a href="#!" class="secondary-content"><i class="material-icons">grade</i></a> -->
+          </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}

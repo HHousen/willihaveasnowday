@@ -1,0 +1,25 @@
+{# myapp/templates/macros.html #}
+
+<!-- Highlight the current tab -->
+{% macro nav_link(endpoint, text) %}
+	{% if request.endpoint is not none %}
+		{% if request.endpoint.endswith(endpoint) %}
+			<li class="active"><a href="{{ url_for(endpoint) }}">{{ text }}</a></li>
+		{% else %}
+			<li><a href="{{ url_for(endpoint) }}">{{ text }}</a></li>
+		{% endif %}
+	{% else %}
+		<li><a href="{{ url_for(endpoint) }}">{{ text }}</a></li>
+	{% endif %}
+{% endmacro %}
+
+<!-- Render a WTForm form's field (with it's possible associated errors) from a WTForms form -->
+{% macro render_field(field) %}
+	{{ field(name_=field.name, id=field.name, class="validate") }}
+	<label for="{{ field.name }}">{{ field.description|title }}</label>
+  	{% if field.errors %}
+		{% for error in field.errors %}
+		<span class="helper-text red-text left">{{ error }}</span>
+		{% endfor %}
+  	{% endif %}
+{% endmacro %}

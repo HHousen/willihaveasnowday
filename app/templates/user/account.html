@@ -1,0 +1,26 @@
+{% extends "layout.html" %}
+{% block head %}
+    {{ super() }}
+    
+{% endblock %}
+
+{% block content %}
+    <div class="section">
+        <div class="container">
+            <div class="row center">
+                <img class="circle" src="{{ current_user.avatar(128) }}">
+                <h3>{{ current_user.full_name | title }}</h3>
+                <p>Last Seen On: {{ moment(current_user.last_seen).format('LLL') }}</p>
+                <p>Credits: {{ current_user.credits }}</p>
+                <a href="{{ url_for('userbp.pay') }}" class="waves-effect waves-light btn">Buy More Credits</a>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block footer %}{% endblock %}
+{% block scripts %}
+{{ super()  }}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js" integrity="sha256-4iQZ6BVL4qNKlQ27TExEhBN1HFPvAvAMbFavKKosSWQ=" crossorigin="anonymous"></script>
+    {{ moment.include_moment(no_js=True) }}
+{% endblock %}

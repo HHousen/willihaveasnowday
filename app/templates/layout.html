@@ -1,0 +1,52 @@
+{% import "components/macros.html" as m %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	{% block head %}
+	<meta charset="utf-8">
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+	<title>{{ title }} - Will I Have A Snowday?</title>
+	<link rel="shortcut icon" href="{{ url_for('static', filename='img/favicon.png') }}">
+
+	<!-- Materialize.css Icons -->
+	<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+	<!-- Main CSS -->
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+	{% endblock %}
+</head>
+<body>
+	{% block nav %} {% include "components/nav.html" %} {% endblock %}
+
+	{% block content %}{% endblock %}
+
+	{% block footer %} {% include "components/footer.html" %} {% endblock %}
+	
+	{% block scripts %}
+	<!-- Scripts -->
+	<!-- jQuery -->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+	<!-- Materialize.css -->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js" integrity="sha256-U/cHDMTIHCeMcvehBv1xQ052bPSbJtbuiw4QA9cTKz0=" crossorigin="anonymous"></script>
+	<!-- Custom JS -->
+	<script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
+	{% endblock %}
+
+	<!-- Message flashing -->
+	{% with messages = get_flashed_messages(with_categories=true) %}
+	{% if messages %}
+		<script>
+			$( document ).ready(function() {
+			{% for category, message in messages %}
+				M.toast({html: '{{ message }}'});
+				
+			{% endfor %}
+			});
+		</script>
+	{% endif %}
+	{% endwith %}
+
+	{% block final %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,14 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="section">
+        <div class="error-box" align="center">
+            <img class="responsive-img" style="width:300px" src="{{ url_for('static', filename='img/error.png') }}">
+            <h1>{{ message }}<h1>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block footer %}{% endblock %}

@@ -1,0 +1,38 @@
+[[source]]
+url = "https://pypi.python.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+flask = "*"
+Flask-Admin = "*"
+Flask-Bcrypt = "*"
+Flask-DebugToolbar = "*"
+Flask-Login = "*"
+Flask-Mail = "*"
+Flask-SQLAlchemy = "*"
+Flask-WTF = "*"
+gunicorn = "*"
+itsdangerous = "*"
+pytz = "*"
+structlog = "*"
+termcolor = "*"
+environs = "*"
+WTForms = "*"
+stripe = "*"
+psycopg2-binary = "*"
+click = "*"
+flask-moment = "*"
+email-validator = "*"
+flask-limiter = "*"
+apscheduler = "*"
+sendgrid = "*"
+pgeocode = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.8"
+
+[packages.noaa_sdk]
+git = "https://github.com/HHousen/noaa.git"

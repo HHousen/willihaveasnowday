@@ -1,0 +1,25 @@
+{% extends "user/signup-layout.html" %}
+
+{% block content %}
+	<div id="outer" class="container">
+		<h4 class="white-text">Choose A New Password</h4>
+		<div id="box" class="z-depth-1 grey lighten-4 row">
+			<form class="col s12" action="{{ url_for('userbp.reset', token=token) }}" method="POST">
+				<div class='row'>
+					<div class='input-field col s12'>
+						{{ m.render_field(form.password) }}
+					</div>
+				</div>
+				<div class='row'>
+					<div class='input-field col s12'>
+						{{ m.render_field(form.confirm) }}
+					</div>
+				</div>
+				<div class='row'>
+					<button class="btn btn-large waves-effect" type="submit">Confirm</button>
+				</div>
+				{{ form.csrf_token }}
+			</form>
+		</div>
+	</div>
+{% endblock %}

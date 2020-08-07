@@ -1,0 +1,33 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container">
+    <h1 class="center-align">Contact</h1>
+    <form class="col s12" action="/contact" method="post">
+        <div class='row'>
+            <div class='input-field col s12 m6'>
+                {{ m.render_field(form.name) }}
+            </div>
+            <div class='input-field col s12 m6'>
+                {{ m.render_field(form.email) }}
+            </div>
+        </div>
+        <div class='row'>
+            <div class='input-field col s12'>
+                {{ m.render_field(form.subject) }}
+            </div>
+        </div>
+        <div class='row'>
+            <div class='input-field col s12'>
+                {{ m.render_field(form.message) }}
+            </div>
+        </div>
+
+        
+        <div class='row' style="margin-bottom: 20px">
+            <button type='submit' class='col s12 btn btn-large waves-effect'><i class="material-icons right">send</i>Send</button>
+        </div>
+        {{ form.csrf_token }}
+    </form>
+</div>
+{% endblock %}

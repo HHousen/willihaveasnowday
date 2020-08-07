@@ -96,7 +96,7 @@ class PreditionReport(db.Model):
 
     @classmethod
     def get_recent_prediction(cls, zip_code):
-        zip_code_entry = cls.query.order_by(-PreditionReport.created_at).filter_by(zip_code=zip_code).first()
+        zip_code_entry = cls.query.order_by(PreditionReport.created_at.desc()).filter_by(zip_code=zip_code).first()
         if zip_code_entry is not None and zip_code_entry.created_at > datetime.datetime.now()-datetime.timedelta(hours=1):
             return zip_code_entry
         

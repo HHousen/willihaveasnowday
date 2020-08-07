@@ -1,131 +1,139 @@
 {% extends "layout.html" %}
 
 {% block head %}
-	{{ super() }}
-	<style>
-		body {
-			height: 100vh;
-			/* overflow: auto; */
-			position: relative;
-			min-height: 700px;
+{{ super() }}
+<script data-ad-client="ca-pub-5688177144759966" async
+	src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<style>
+	body {
+		height: 100vh;
+		/* overflow: auto; */
+		position: relative;
+		min-height: 700px;
+	}
+
+	body:before {
+		content: "";
+		position: fixed;
+		top: -5%;
+		left: -5%;
+		right: 0;
+		z-index: -1;
+
+		display: block;
+		background: #222;
+		background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('https://source.unsplash.com/1920x1080/?nature,snow');
+		background-size: cover;
+		width: 110%;
+		height: 110%;
+
+		filter: blur(4px);
+	}
+
+	#box {
+		border-radius: 25px;
+		padding: 24px 48px 0px 48px;
+		border: 5px solid #ef6c00;
+	}
+
+	#results-panel {
+		min-height: 700px;
+	}
+
+	.circle-bg {
+		fill: none;
+		stroke: #eee;
+		stroke-width: 3.8;
+	}
+
+	.circle {
+		fill: none;
+		stroke-width: 2.8;
+		stroke-linecap: round;
+		animation: progress 1s ease-out forwards;
+	}
+
+	@keyframes progress {
+		0% {
+			stroke-dasharray: 0 100;
 		}
+	}
 
-		body:before {
-			content: "";
-			position: fixed;
-			top: -5%;
-			left: -5%;
-			right: 0;
-			z-index: -1;
+	.circular-chart.cc-red .circle {
+		stroke: #C62828;
+	}
+	.circular-chart {
+		max-width: 240px;
+	}
 
-			display: block;
-			background: #222;
-			background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('https://source.unsplash.com/1920x1080/?nature,snow');
-			background-size: cover;
-			width: 110%;
-			height: 110%;
-
-			filter: blur(4px);
-		}
-
-		#box {
-			border-radius: 25px;
-			padding: 24px 48px 0px 48px;
-			border: 5px solid #ef6c00;
-		}
-
-		.circle-bg {
-			fill: none;
-			stroke: #eee;
-			stroke-width: 3.8;
-		}
-
-		.circle {
-			fill: none;
-			stroke-width: 2.8;
-			stroke-linecap: round;
-			animation: progress 1s ease-out forwards;
-		}
-
-		@keyframes progress {
-			0% {
-				stroke-dasharray: 0 100;
-			}
-		}
-
-		.circular-chart.cc-red .circle {
-			stroke: #C62828;
-		}
-
-		.percentage {
-			fill: rgba(255, 255, 255, 0.9);
-			font-size: 0.5em;
-			text-anchor: middle;
-		}
-	</style>
+	.percentage {
+		fill: rgba(255, 255, 255, 0.9);
+		font-size: 0.5em;
+		text-anchor: middle;
+	}
+</style>
 {% endblock %}
 
 {% block content %}
-<div id="prediction-wrapper" class="valign-wrapper">
+<div id="prediction-wrapper" class="valign-wrapper-med-up">
 	<div class="container">
-		<div id="predict-panel" class="row center valign-wrapper">
-			<div class="col s12 m12 l3">
-				<img class="responsive-img" src="{{ url_for('static', filename='img/logo_256.png') }}" alt="Snowflake Logo">
-			</div>
-			<div class="col s12 m12 l9">
-				<div class="row">
-					<h5 class="header light" style="color: rgba(255,255,255,.9);">Use your zipcode to automatically
-						calculate your chance of having a snowday using AI & Machine Learning</h5>
+		<div id="predict-panel">
+			<div class="row center valign-wrapper-med-up">
+				<div class="col s12 m12 l3">
+					<img class="responsive-img" src="{{ url_for('static', filename='img/logo_256.png') }}"
+						alt="Snowflake Logo">
 				</div>
+				<div class="col s12 m12 l9">
+					<div class="row">
+						<h5 class="header light" style="color: rgba(255,255,255,.9);">Use your zipcode to automatically
+							calculate your chance of having a snowday using AI & Machine Learning</h5>
+					</div>
 
 					<div id="box" class="z-depth-1 grey lighten-4 row">
 						<form id="predict-form" action="/predict" method="post">
-							<div class='row valign-wrapper'>
-								<div class='col s12 m6 l5'>
+							<div class='row valign-wrapper-med-up'>
+								<div class='col s12 m6 l4 xl5'>
 									<div class='input-field col s12'>
 										{{ m.render_field(predict_form.zip_code) }}
 									</div>
 								</div>
 
-								<div class='col s12 m6 l5'>
+								<div class='col s12 m6 l4 xl5'>
 									<div class='input-field col s12'>
 										{{ m.render_field(predict_form.num_snowdays) }}
 									</div>
 
 								</div>
-								<div class='col s12 m12 l2'>
+								<div class='col s12 m12 l4 xl2'>
 									<button id="predict-form-submit-btn" type='submit' name='btn_predict'
 										class='col s12 btn btn-large waves-effect disabled'>Predict</button>
-									<div id="predict-form-btn-loader" class="preloader-wrapper small active" style="display: none;">
-										<div class="spinner-layer spinner-green-only">
+									<div id="predict-form-btn-loader" class="preloader-wrapper small active"
+										style="display: none;">
+										<div class="spinner-layer spinner-blue-only">
 											<div class="circle-clipper left">
-											<div class="circle"></div>
-											</div><div class="gap-patch">
-											<div class="circle"></div>
-											</div><div class="circle-clipper right">
-											<div class="circle"></div>
+												<div class="circle"></div>
+											</div>
+											<div class="gap-patch">
+												<div class="circle"></div>
+											</div>
+											<div class="circle-clipper right">
+												<div class="circle"></div>
 											</div>
 										</div>
-										</div>
+									</div>
 								</div>
 								{{ predict_form.csrf_token }}
 							</div>
 						</form>
 					</div>
-				<!-- <nav class="red darken-3">
-					<div class="nav-wrapper">
-						<form class="search">
-							<div class="input-field">
-								<input id="search" type="search">
-								<label class="label-icon" for="search"><i class="material-icons">search</i></label>
-								<i class="material-icons">close</i>
-							</div>
-						</form>
+					<div class="row center">
+						<img src="https://via.placeholder.com/728x90">
 					</div>
-				</nav> -->
+				</div>
 			</div>
 		</div>
-		<div id="results-panel" class="row center" style="display: none;">
+
+		<div id="results-panel" class="row center" style="display: none;margin-top: 20px;">
 			<div class="row">
 				<a id="go-back-btn" class="waves-effect btn-flat waves-light left" style="color: rgba(255,255,255,.9);">
 					<i class="material-icons left">arrow_back</i>
@@ -135,75 +143,61 @@
 					<i class="material-icons left">refresh</i>
 					Update Prediction
 				</a>
-				<a id="help-improve-btn" class="waves-effect waves-light btn right modal-trigger" href="#help-improve"><i class="material-icons left">help_outline</i>Help Improve This Prediction</a>
+				<a id="help-improve-btn" class="waves-effect waves-light btn right modal-trigger"
+					href="#help-improve"><i class="material-icons left">help_outline</i>Help Improve This Prediction</a>
 			</div>
 
-			<div class="row valign-wrapper">
+			<div class="row valign-wrapper-med-up">
 
 				<div class="row">
-					<div class="col m12 l4">
+					<div class="col s12 m6 l4">
 						<div id="day-0-card" class="card orange darken-4">
 							<div class="card-content white-text">
 								<svg viewBox="0 0 36 36" class="circular-chart cc-red" style="width: 70%;">
-									<path class="circle-bg"
-									  d="M18 2.0845
+									<path class="circle-bg" d="M18 2.0845
 										a 15.9155 15.9155 0 0 1 0 31.831
-										a 15.9155 15.9155 0 0 1 0 -31.831"
-									/>
-									<path class="circle"
-									  stroke-dasharray="0, 100"
-									  d="M18 2.0845
+										a 15.9155 15.9155 0 0 1 0 -31.831" />
+									<path class="circle" stroke-dasharray="0, 100" d="M18 2.0845
 										a 15.9155 15.9155 0 0 1 0 31.831
-										a 15.9155 15.9155 0 0 1 0 -31.831"
-									/>
+										a 15.9155 15.9155 0 0 1 0 -31.831" />
 									<text x="18" y="20.35" class="percentage">Loading</text>
-								  </svg>
+								</svg>
 								<span class="card-title">Loading...</span>
 								<p><strong id="day-0-percentage-text">Loading</strong>% chance of a snowday.</p>
 								<p id="day-0-text">Loading...</p>
 							</div>
 						</div>
 					</div>
-					<div class="col m12 l4">
+					<div class="col s12 m6 l4">
 						<div id="day-1-card" class="card orange darken-3">
 							<div class="card-content white-text">
 								<svg viewBox="0 0 36 36" class="circular-chart cc-red" style="width: 70%;">
-									<path class="circle-bg"
-									  d="M18 2.0845
+									<path class="circle-bg" d="M18 2.0845
 										a 15.9155 15.9155 0 0 1 0 31.831
-										a 15.9155 15.9155 0 0 1 0 -31.831"
-									/>
-									<path class="circle"
-									  stroke-dasharray="0, 100"
-									  d="M18 2.0845
+										a 15.9155 15.9155 0 0 1 0 -31.831" />
+									<path class="circle" stroke-dasharray="0, 100" d="M18 2.0845
 										a 15.9155 15.9155 0 0 1 0 31.831
-										a 15.9155 15.9155 0 0 1 0 -31.831"
-									/>
+										a 15.9155 15.9155 0 0 1 0 -31.831" />
 									<text x="18" y="20.35" class="percentage">Loading</text>
-								  </svg>
+								</svg>
 								<span class="card-title">Loading...</span>
 								<p><strong id="day-1-percentage-text">Loading</strong>% chance of a snowday.</p>
 								<p id="day-1-text">Loading...</p>
 							</div>
 						</div>
 					</div>
-					<div class="col m12 l4">
+					<div class="col s12 m6 l4">
 						<div id="day-2-card" class="card orange darken-2">
 							<div class="card-content white-text">
 								<svg viewBox="0 0 36 36" class="circular-chart cc-red" style="width: 70%;">
-									<path class="circle-bg"
-									  d="M18 2.0845
+									<path class="circle-bg" d="M18 2.0845
 										a 15.9155 15.9155 0 0 1 0 31.831
-										a 15.9155 15.9155 0 0 1 0 -31.831"
-									/>
-									<path class="circle"
-									  stroke-dasharray="0, 100"
-									  d="M18 2.0845
+										a 15.9155 15.9155 0 0 1 0 -31.831" />
+									<path class="circle" stroke-dasharray="0, 100" d="M18 2.0845
 										a 15.9155 15.9155 0 0 1 0 31.831
-										a 15.9155 15.9155 0 0 1 0 -31.831"
-									/>
+										a 15.9155 15.9155 0 0 1 0 -31.831" />
 									<text x="18" y="20.35" class="percentage">Loading</text>
-								  </svg>
+								</svg>
 								<span class="card-title">Loading...</span>
 								<p><strong id="day-2-percentage-text">Loading</strong>% chance of a snowday.</p>
 								<p id="day-2-text">Loading...</p>
@@ -217,16 +211,24 @@
 </div>
 
 <div id="help-improve" class="modal">
-    <div class="modal-content">
-	  <h4>Help Improve The AI Predictions</h4>
-	  {% if signed_in %}
-		<p>Since you are signed into an account we will follow up with you at 4:00pm the day of the predicted snowday regarding every unique prediction you make. All you have to do is press one button in the email: "Yes I had a snowday" or "No I did not have a snowday".</p>
-		<p>A unique prediction means each zip code. You will only be emailed once if you make several predictions for the same zip code.</p>
-		<p>Additionally, since you are signed in, you can track your contributions and see how you compare to others on the <a href="{{ url_for('mainbp.leaderboard') }}">leaderboard</a>.</p>
-	  {% else %}
-		<p>Our AI is trained on decades of data. However, this data is far from complete. There are thousands of schools that we have no snowday data for.</p>
-		<p>Every prediction made has the potential to improve all future predictions. All we need is one crucial piece of information: whether or not you actually had a snow day.</p> 
-		<p>Enter your email in the box below and we will follow up with you about this prediction at 4:00pm the day of the predicted snowday. All you have to do is press one button in the email: "Yes I had a snowday" or "No I did not have a snowday".</p>
+	<div class="modal-content">
+		<h4>Help Improve The AI Predictions</h4>
+		{% if signed_in %}
+		<p>Since you are signed into an account we will follow up with you at 4:00pm the day of the predicted snowday
+			regarding every unique prediction you make. All you have to do is press one button in the email: "Yes I had
+			a snowday" or "No I did not have a snowday".</p>
+		<p>A unique prediction means each zip code. You will only be emailed once if you make several predictions for
+			the same zip code.</p>
+		<p>Additionally, since you are signed in, you can track your contributions and see how you compare to others on
+			the <a href="{{ url_for('mainbp.leaderboard') }}">leaderboard</a>.</p>
+		{% else %}
+		<p>Our AI is trained on decades of data. However, this data is far from complete. There are thousands of schools
+			that we have no snowday data for.</p>
+		<p>Every prediction made has the potential to improve all future predictions. All we need is one crucial piece
+			of information: whether or not you actually had a snow day.</p>
+		<p>Enter your email in the box below and we will follow up with you about this prediction at 4:00pm the day of
+			the predicted snowday. All you have to do is press one button in the email: "Yes I had a snowday" or "No I
+			did not have a snowday".</p>
 
 		<form id="help-form" action="/help-improve" method="post">
 			<div class='row'>
@@ -237,21 +239,21 @@
 				</div>
 
 				<div class='col s12 m12 l3'>
-					<button type='submit' name='btn_predict' class='col s12 btn btn-large waves-effect'><i class="material-icons right">send</i>Save</button>
+					<button type='submit' name='btn_predict' class='col s12 btn btn-large waves-effect'><i
+							class="material-icons right">send</i>Save</button>
 				</div>
 			</div>
-				{{ help_form.csrf_token }}
+			{{ help_form.csrf_token }}
 		</form>
 
 		<p>Once we receive your response we delete your email address. No spam.</p>
-	  {% endif %}
+		{% endif %}
 	</div>
-    <div class="modal-footer">
-      <a href="#!" class="modal-close waves-effect waves-red btn-flat">Close</a>
-    </div>
+	<div class="modal-footer">
+		<a href="#!" class="modal-close waves-effect waves-red btn-flat">Close</a>
+	</div>
 </div>
 {% endblock %}
-
 
 
 {% block final %}
@@ -301,7 +303,7 @@
 		}
 	}
 
-	function successHelper(extra_text="") {
+	function successHelper(extra_text = "") {
 		M.toast({
 			html: 'Prediction Successful!' + extra_text
 		});
@@ -310,18 +312,20 @@
 		})
 	}
 
-	function animateProgressBar(duration, end_func=false) {
-		progressBarLongTimeNotificationTimer = setTimeout(function() {
+	function animateProgressBar(duration, end_func = false) {
+		progressBarLongTimeNotificationTimer = setTimeout(function () {
 			M.toast({
 				html: 'The AI engine is taking an abnormally long time. Please wait...'
 			});
-		}, duration*1.30);
-		$("#nav-progress-bar").fadeIn(0).animate({"width": "100%"}, duration, "swing", end_func);
+		}, duration * 1.30);
+		$("#nav-progress-bar").fadeIn(0).animate({
+			"width": "100%"
+		}, duration, "swing", end_func);
 	}
 
 	function resetProgressBar() {
 		clearInterval(progressBarLongTimeNotificationTimer)
-		$("#nav-progress-bar").fadeOut(function() {
+		$("#nav-progress-bar").fadeOut(function () {
 			$("#nav-progress-bar").css("width", "0")
 		})
 	}
@@ -338,8 +342,8 @@
 		// 600000 milliseconds is 10 minutes
 		if (current_time - last_prediction_time < 600000 && zip_code == last_zip_code) {
 			$("#predict-form-submit-btn").removeClass("disabled")
-			successHelper(extra_text=" New weather data is obtained hourly.")
-			$("#predict-panel").fadeOut("slow", function() {
+			successHelper(extra_text = " New weather data is obtained hourly.")
+			$("#predict-panel").fadeOut("slow", function () {
 				$("#results-panel").fadeIn("slow")
 			});
 			animateProgressBar(200, resetProgressBar)
@@ -347,7 +351,7 @@
 		}
 
 		animateProgressBar(10000)
-		$("#predict-form-submit-btn").fadeOut(function() {
+		$("#predict-form-submit-btn").fadeOut(function () {
 			$("#predict-form-btn-loader").fadeIn()
 		})
 
@@ -379,7 +383,7 @@
 				}
 			},
 			complete: function (request, status) {
-				$("#predict-form-btn-loader").stop().fadeOut(function() {
+				$("#predict-form-btn-loader").stop().fadeOut(function () {
 					$("#predict-form-submit-btn").stop().fadeIn()
 				})
 			}
@@ -448,7 +452,7 @@
 				$("#day-" + i + "-text").html(new_html);
 			}
 
-			$("#results-panel").fadeIn("slow", function() {
+			$("#results-panel").fadeIn("slow", function () {
 				$("#predict-form-submit-btn").removeClass("disabled")
 			});
 		});

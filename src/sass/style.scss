@@ -41,18 +41,15 @@ footer.page-footer {
   margin: 0;
 }
 
-@media  #{$medium-and-down} {
-  .valign-wrapper {
-    display: inherit;
+@media #{$medium-and-up} {
+  #prediction-wrapper {
+    min-height: calc(100% - 64px);
   }
 }
 
-#prediction-wrapper {
-  height: 100%;
-}
-
-@media #{$medium-and-up} {
-  #prediction-wrapper {
-    height: calc(100% - 64px);
+@media #{$large-and-up} {
+  .valign-wrapper-med-up {
+    display: flex;
+    align-items: center;
   }
 }

@@ -27,6 +27,7 @@
     "brunch": "^2.10.17",
     "concurrently": "^4.1.0",
     "postcss-brunch": "^3.0.0",
-    "sass-brunch": "^2.10.8"
+    "sass-brunch": "^2.10.8",
+    "terser-brunch": "^4.0.0"
   }
 }

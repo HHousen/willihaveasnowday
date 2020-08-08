@@ -18,6 +18,8 @@ from sendgrid.helpers.mail import To, Substitution, Personalization, From
 
 from app.views import noaa_api
 
+from uszipcode import SearchEngine
+
 import atexit
 import time
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -93,6 +95,19 @@ def index():
 @mainbp.route('/about')
 def about():
     return render_template('about.html', title="About")
+
+@mainbp.route('/reverse-geocode', methods=['POST'])
+@limiter.limit("10 per minute")
+def reverse_geocode():
+    if request.content_type == "application/json":
+        latitude = request.json["latitude"]
+        longitude = request.json["longitude"]
+        
+        search = SearchEngine(simple_zipcode=True)
+        result_obj = search.by_coordinates(lat=latitude, lng=longitude, radius=10, returns=1)[0]
+        return result_obj.zipcode
+    
+    return "Incorrect data type submitted", 400
 
 @mainbp.route('/predict', methods=['POST'])
 @limiter.limit("6 per minute")

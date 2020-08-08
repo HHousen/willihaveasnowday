@@ -3,7 +3,10 @@ exports.files = {
         joinTo: 'css/style.css'
     },
     javascripts: {
-        joinTo: 'js/scripts.js'
+        joinTo: {
+            'js/scripts.js': /scripts/,
+            'js/index.js': /index/
+        }
     }
 };
   

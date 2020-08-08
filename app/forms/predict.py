@@ -6,7 +6,7 @@ class Predict(FlaskForm):
 
     ''' Main prediction info form. '''
 
-    zip_code = IntegerField(validators=[Required()],
+    zip_code = TextField(validators=[Required()],
                       description='ZIP Code')
     num_snowdays = IntegerField(validators=[InputRequired(), NumberRange(min=0, max=42)],
                      description='Number of Snow Days this Year')

@@ -2,7 +2,7 @@ from flask import Flask, render_template
 from app import commands, admin
 from app.views import user, main
 from app.models import User
-from app.extensions import bcrypt, db, toolbar, login_manager, mail, moment, limiter
+from app.extensions import bcrypt, db, toolbar, login_manager, mail, moment, limiter, minifier
 from app.logger_setup import logger_setup
 import os.path as op
 
@@ -29,6 +29,7 @@ def register_extensions(app):
     mail.init_app(app)
     moment.init_app(app)
     limiter.init_app(app)
+    minifier.init_app(app)
     return None
 
 def register_blueprints(app):

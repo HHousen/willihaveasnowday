@@ -4,7 +4,7 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-flask = "*"
+Flask = "*"
 Flask-Admin = "*"
 Flask-Bcrypt = "*"
 Flask-DebugToolbar = "*"
@@ -22,17 +22,19 @@ WTForms = "*"
 stripe = "*"
 psycopg2-binary = "*"
 click = "*"
-flask-moment = "*"
+Flask-Moment = "*"
 email-validator = "*"
-flask-limiter = "*"
-apscheduler = "*"
+Flask-Limiter = "*"
+APScheduler = "*"
 sendgrid = "*"
 pgeocode = "*"
+uszipcode = "*"
+Flask-Minify = "*"
 
 [dev-packages]
 
 [requires]
 python_version = "3.8"
 
-[packages.noaa_sdk]
+[packages.noaa-sdk]
 git = "https://github.com/HHousen/noaa.git"

@@ -1,12 +1,62 @@
 {% extends "layout.html" %}
 
+{% block head %}
+{{ super() }}
+<style>
+    body {
+        background-color: #e1f5fe;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="container">
-    <div class="section">
-        <div class="error-box" align="center">
-            <img class="responsive-img" style="width:300px" src="{{ url_for('static', filename='img/error.png') }}">
-            <h1>{{ message }}<h1>
+    <div class="section center">
+        <div class="error-box">
+            <svg class="responsive-img" id="Layer_1" style="max-width: 300px;enable-background:new 0 0 24 24;"
+                version="1.1" viewBox="0 0 24 24" xml:space="preserve" xmlns="http://www.w3.org/2000/svg"
+                xmlns:xlink="http://www.w3.org/1999/xlink">
+                <title />
+                <g id="Snowflake">
+                    <g>
+                        <polyline points="8,19 12,16 16,19.03   "
+                            style="fill:none;stroke:#303C42;stroke-linecap:round;stroke-linejoin:round;" />
+                        <polyline points="8.5,22 12,20 15.5,22   "
+                            style="fill:none;stroke:#303C42;stroke-linecap:round;stroke-linejoin:round;" />
+                        <line style="fill:none;stroke:#303C42;stroke-linecap:round;stroke-linejoin:round;" x1="12"
+                            x2="12" y1="0.5" y2="23.5" />
+                        <polyline points="16,5 12,8 8,5   "
+                            style="fill:none;stroke:#303C42;stroke-linecap:round;stroke-linejoin:round;" />
+                        <polyline points="15.5,2 12,4 8.5,2   "
+                            style="fill:none;stroke:#303C42;stroke-linecap:round;stroke-linejoin:round;" />
+                        <polyline points="16,19.03 15.46,14 20,12   "
+                            style="fill:none;stroke:#303C42;stroke-linecap:round;stroke-linejoin:round;" />
+                        <polyline points="8,5 8.54,10 4,12   "
+                            style="fill:none;stroke:#303C42;stroke-linecap:round;stroke-linejoin:round;" />
+                        <polyline points="20,12 15.46,10 16,5   "
+                            style="fill:none;stroke:#303C42;stroke-linecap:round;stroke-linejoin:round;" />
+                        <polyline points="4,12 8.54,14 8,19   "
+                            style="fill:none;stroke:#303C42;stroke-linecap:round;stroke-linejoin:round;" />
+                        <g>
+                            <polyline points="18.97,20.03 18.99,16      22.5,13.97    "
+                                style="fill:none;stroke:#303C42;stroke-linecap:round;stroke-linejoin:round;" />
+                            <line style="fill:none;stroke:#303C42;stroke-linecap:round;stroke-linejoin:round;" x1="1.95"
+                                x2="22.05" y1="6.25" y2="17.75" />
+                            <polyline points="5.03,3.97 5.01,8 1.5,10.03         "
+                                style="fill:none;stroke:#303C42;stroke-linecap:round;stroke-linejoin:round;" />
+                            <polyline points="22.5,10.03 18.99,8 18.97,3.97         "
+                                style="fill:none;stroke:#303C42;stroke-linecap:round;stroke-linejoin:round;" />
+                            <line style="fill:none;stroke:#303C42;stroke-linecap:round;stroke-linejoin:round;" x1="1.95"
+                                x2="22.05" y1="17.75" y2="6.25" />
+                            <polyline points="1.5,13.97 5.01,16 5.03,20.03         "
+                                style="fill:none;stroke:#303C42;stroke-linecap:round;stroke-linejoin:round;" />
+                        </g>
+                    </g>
+                </g>
+            </svg>
+            <h1>{{ message }}</h1>
         </div>
+        <a class="waves-effect waves-light btn" href="{{ url_for('mainbp.index') }}">Go To Home Page</a>
     </div>
 </div>
 {% endblock %}

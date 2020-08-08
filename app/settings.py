@@ -37,6 +37,8 @@ SNOWDAY_STATUS_SALT = env.str('SNOWDAY_STATUS_SALT', default='snowday-status-sal
 EMAIL_CONFIRM_SALT = env.str('EMAIL_CONFIRM_SALT', default='email-confirm-salt')
 PASSWORD_RESET_SALT = env.str('PASSWORD_RESET_SALT', default='password-reset-salt')
 
+ENABLE_ADMIN_INTERFACE = env.bool('ENABLE_ADMIN_INTERFACE', default=True)
+
 UPLOAD_FOLDER = env.str('UPLOAD_FOLDER', default='uploads')
 
 AUTO_CONFIRM = env.bool('AUTO_CONFIRM', default='False')

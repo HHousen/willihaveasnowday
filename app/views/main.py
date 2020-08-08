@@ -18,9 +18,9 @@ from sendgrid.helpers.mail import To, Substitution, Personalization, From
 
 from app.views import noaa_api
 
-# import atexit
-# import time
-# from apscheduler.schedulers.background import BackgroundScheduler
+import atexit
+import time
+from apscheduler.schedulers.background import BackgroundScheduler
 
 def create_follow_up_email(prediction, user, ts, extra):
     start_token = str(extra) + "-" + str(prediction.id) + "-" + str(user.id)
@@ -70,12 +70,12 @@ def send_follow_up_emails():
     )
 
 
-# scheduler = BackgroundScheduler()
-# scheduler.add_job(func=send_follow_up_emails, trigger="cron", hour=15, minute=58)
-# scheduler.start()
+scheduler = BackgroundScheduler()
+scheduler.add_job(func=send_follow_up_emails, trigger="cron", hour=15, minute=58)
+scheduler.start()
 
-# # Shut down the scheduler when exiting the app
-# atexit.register(lambda: scheduler.shutdown())
+# Shut down the scheduler when exiting the app
+atexit.register(lambda: scheduler.shutdown())
 
 mainbp = Blueprint('mainbp', __name__)
 
@@ -203,7 +203,7 @@ def snowday_status(token):
 def contact():
     form = contact_forms.Contact()
     if form.validate_on_submit():
-        status, response = email.send(current_app.config['CONTACT_EMAIL'], form.subject.data, form.message.data, from_email=form.email.data)
+        status, response = email.send(current_app.config['CONTACT_EMAIL'], "[WIHASD Support] " + str(form.subject.data), form.message.data, from_email=form.email.data)
         if status == "success":
             flash('Your message has been sent', 'positive')
         elif status == "fail":

@@ -39,9 +39,10 @@ def register_blueprints(app):
 
 def register_admins(app):
     """Register Flask admins."""
-    from flask_admin import Admin
-    admin_panel = Admin(app, name='Admin', template_mode='bootstrap3')
-    admin.init_admin(admin_panel)
+    if app.config['ENABLE_ADMIN_INTERFACE']:
+        from flask_admin import Admin
+        admin_panel = Admin(app, name='Admin', template_mode='bootstrap3')
+        admin.init_admin(admin_panel)
     return None
 
 def register_errorhandlers(app):

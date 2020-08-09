@@ -24,6 +24,9 @@ import atexit
 import time
 from apscheduler.schedulers.background import BackgroundScheduler
 
+with open("app/index_backgrounds_base64.txt", "r") as file:
+    index_backgrounds_base64 = file.readlines()
+
 def create_follow_up_email(prediction, user, ts, extra):
     start_token = str(extra) + "-" + str(prediction.id) + "-" + str(user.id)
     yes_token = ts.dumps(start_token + "-1", salt=current_app.config['SNOWDAY_STATUS_SALT'])
@@ -89,15 +92,17 @@ def index():
             session['id'] = str(uuid.uuid4())
     predict_form = predict_forms.Predict()
     help_form = help_forms.Help()
-    
-    return render_template('index.html', predict_form=predict_form, help_form=help_form, signed_in=current_user.is_authenticated)
+    background = "data:image/jpeg;base64,"
+    background += random.choice(index_backgrounds_base64)
+
+    return render_template('index.html', predict_form=predict_form, help_form=help_form, signed_in=current_user.is_authenticated, background=background)
 
 @mainbp.route('/about')
 def about():
     return render_template('about.html', title="About")
 
 @mainbp.route('/reverse-geocode', methods=['POST'])
-@limiter.limit("10 per minute")
+@limiter.limit("4 per minute")
 def reverse_geocode():
     if request.content_type == "application/json":
         latitude = request.json["latitude"]
@@ -110,7 +115,7 @@ def reverse_geocode():
     return "Incorrect data type submitted", 400
 
 @mainbp.route('/predict', methods=['POST'])
-@limiter.limit("6 per minute")
+@limiter.limit("4 per minute")
 def predict():
     if not current_user.is_authenticated:
         unauth_user = UnauthUser.query.filter_by(uuid=session['id']).first()

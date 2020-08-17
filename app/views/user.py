@@ -54,7 +54,7 @@ def signup():
         # Render an HTML template to send by email
         html = render_template('email/confirm.html', confirm_url=confirmUrl)
         # Send the email to user
-        email.send(user.email, subject, html)
+        email.send(user.email, subject, html, from_email=current_app.config['REGISTER_FROM_EMAIL'])
         # Send back to the home page
         flash('Check your email to confirm your email address', 'positive')
         return redirect(url_for('mainbp.index'))
@@ -135,7 +135,7 @@ def forgot():
             # Render an HTML template to send by email
             html = render_template('email/reset.html', reset_url=resetUrl)
             # Send the email to user
-            email.send(user.email, subject, html)
+            email.send(user.email, subject, html, from_email=current_app.config['REGISTER_FROM_EMAIL'])
             # Send back to the home page
             flash('Check your emails to reset your password', 'positive')
             return redirect(url_for('index'))

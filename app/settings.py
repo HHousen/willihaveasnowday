@@ -45,6 +45,8 @@ AUTO_CONFIRM = env.bool('AUTO_CONFIRM', default='False')
 
 CONTACT_EMAIL = env.str('CONTACT_EMAIL', default='False')
 DEFAULT_FROM_EMAIL = env.str('DEFAULT_FROM_EMAIL', default='admin@example.com')
+REGISTER_FROM_EMAIL = env.str('REGISTER_FROM_EMAIL', default='admin@example.com')
+IMPROVE_FROM_EMAIL = env.str('IMPROVE_FROM_EMAIL', default='admin@example.com')
 
 # If `SENDGRID_API_KEY` is set then emails will be sent using Sendgrid instead of Flask-Mail
 SENDGRID_API_KEY = env.str('SENDGRID_API_KEY', default='False')

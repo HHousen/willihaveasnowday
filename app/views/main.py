@@ -80,7 +80,7 @@ def send_follow_up_emails():
         personalizations=to_emails,
         subject="Was our prediction right? - WillIHaveASnowDay.com",
         body=html,
-        from_email=From(email=current_app.config['DEFAULT_FROM_EMAIL'], name="Help Improve @ WilliHaveASnowDay.com"),
+        from_email=From(email=current_app.config['IMPROVE_FROM_EMAIL'], name="Help Improve @ WilliHaveASnowDay.com"),
         sendgrid_only=True
     )
 

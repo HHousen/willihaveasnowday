@@ -27,8 +27,8 @@ from apscheduler.schedulers.background import BackgroundScheduler
 with open("app/index_backgrounds_base64.txt", "r") as file:
     index_backgrounds_base64 = file.readlines()
 
-def create_follow_up_email(prediction, user, ts, extra):
-    start_token = str(extra) + "-" + str(prediction.id) + "-" + str(user.id)
+def create_follow_up_email(prediction_id, zip_code, user, ts, extra):
+    start_token = str(extra) + "-" + str(prediction_id) + "-" + str(user.id)
     yes_token = ts.dumps(start_token + "-1", salt=current_app.config['SNOWDAY_STATUS_SALT'])
     yes_url = url_for('mainbp.snowday_status', token=yes_token, _external=True)
     no_token = ts.dumps(start_token + "-0", salt=current_app.config['SNOWDAY_STATUS_SALT'])
@@ -38,7 +38,7 @@ def create_follow_up_email(prediction, user, ts, extra):
     to_object = To(email=user.email, substitutions=[
         Substitution('((yes_url))', yes_url, p),
         Substitution('((no_url))', no_url, p),
-        Substitution('((zip_code))', prediction.zip_code)
+        Substitution('((zip_code))', zip_code)
     ])
     p.add_to(to_object)
 
@@ -51,18 +51,28 @@ def send_follow_up_emails():
     yesterday = (dt.datetime.now() - dt.timedelta(1)).replace(hour=12, minute=0, second=0).strftime('%Y-%m-%d %H:%M:%S')
     
     to_emails = []
-    for prediction in PreditionReport.query.filter(PreditionReport.created_at.between(yesterday, today), not PreditionReport.emailed):
-        for assoc in prediction.users_ids:
-            user = assoc.user_rel
-            p = create_follow_up_email(prediction, user, ts, extra="full")
+    distinct_zip_codes = PreditionReport.query.with_entities(PreditionReport.zip_code).distinct().all()
+    distinct_zip_codes = [x[0] for x in distinct_zip_codes]
+
+    for zip_code in distinct_zip_codes:
+        predictions = PreditionReport.query.filter(PreditionReport.created_at.between(yesterday, today), PreditionReport.emailed == False, PreditionReport.zip_code == zip_code).all()
+
+        users = set([assoc.user_rel for prediction in predictions for assoc in prediction.users_ids])
+        unauth_users = set([assoc.unauth_user_rel for prediction in predictions for assoc in prediction.unauth_users_ids])
+
+        predictions_ids = [str(prediction.id) for prediction in predictions]
+        predictions_ids_tokenized = ",".join(predictions_ids)
+
+        for user in users:
+            p = create_follow_up_email(predictions_ids_tokenized, zip_code, user, ts, extra="full")
             to_emails.append(p)
-        for assoc in prediction.unauth_users_ids:
-            user = assoc.unauth_user_rel
-            p = create_follow_up_email(prediction, user, ts, extra="un")
+        for unauth_user in unauth_users:
+            p = create_follow_up_email(predictions_ids_tokenized, zip_code, unauth_user, ts, extra="un")
             to_emails.append(p)
         
-        prediction.emailed = True
-        db.session.commit()
+        for prediction in predictions:
+            prediction.emailed = True
+            db.session.commit()
     
     html = render_template('email/improve.html')
     email.send(
@@ -203,17 +213,38 @@ def snowday_status(token):
         flash("That code is no longer valid.")
         abort(404)
     
+    prediction_ids = prediction_id.split(",")
+
+    statuses = []
     if user_type == "full":
-        association = UserPredictions.query.filter_by(prediction_id=prediction_id, user_id=user_id).first()
-        if association.snowday_status is None:
+        for prediction_id in prediction_ids:
+            association = UserPredictions.query.filter_by(prediction_id=prediction_id, user_id=user_id).first()
+            if association is not None:
+                statuses.append(association.snowday_status)
+                association.snowday_status = response
+        
+        if not all(statuses):
+            flash("Response recorded successfully and points awarded.")
             association.user_rel.points += 1
+        else:
+            flash("Response updated. Points already awarded.")
+    
     elif user_type == "un":
-        association = UnauthUserPredictions.query.filter_by(prediction_id=prediction_id, unauth_user_id=user_id).first()
+        for prediction_id in prediction_ids:
+            association = UnauthUserPredictions.query.filter_by(prediction_id=prediction_id, unauth_user_id=user_id).first()
+            if association is not None:
+                statuses.append(association.snowday_status)
+                association.snowday_status = response
+            
+        if not all(statuses):
+            flash("Response recorded successfully.")
+        else:
+            flash("Response updated.")
+    
     else:
         flash("Corrupted code submitted.")
         abort(404)        
 
-    association.snowday_status = response
     db.session.commit()
 
     return render_template('thanks.html', title='Thanks')

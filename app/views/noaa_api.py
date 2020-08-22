@@ -57,14 +57,14 @@ def get_date_details(date):
         date_dict[n] = getattr(date, n.lower())
     return date_dict
 
-def pad(manipulate):
-    if len(manipulate[0]) not in (24, 0):
-        if type(manipulate[0][0]) is str or manipulate[0][0] is None:
-            current_day_median = statistics.mode(manipulate[0])
+def pad(manipulate, index=0):
+    if len(manipulate[index]) not in (24, 0):
+        if type(manipulate[index][0]) is str or manipulate[index][0] is None:
+            current_day_median = statistics.mode(manipulate[index])
         else:
-            current_day_median = statistics.median(manipulate[0])
-        for _ in range(24 - len(manipulate[0])):
-            manipulate[0].insert(0, current_day_median)
+            current_day_median = statistics.median(manipulate[index])
+        for _ in range(24 - len(manipulate[index])):
+            manipulate[index].insert(0, current_day_median)
 
 def generate_hourly(weather_data, name, scaling_factor=None):
     daily_values_lists = []
@@ -115,16 +115,19 @@ def generate_hourly(weather_data, name, scaling_factor=None):
     if type(name) is dict:
         for idx, _ in enumerate(name):
             del daily_values_lists[idx][-1]
-    else:
-        del daily_values_lists[-1]
+    # else:
+    #     del daily_values_lists[-1]
     
-    # Pad the first day to 24 entries (hours) by adding the median to the beginning of the list
+    # Pad the first and last days to 24 entries (hours) by adding the median to the
+    # beginning of the list,
     if type(name) is dict:
         for idx, (element_name, item) in enumerate(name.items()):
             manipulate = daily_values_lists[idx]
             pad(manipulate)
+            pad(manipulate, -1)
     else:
         pad(daily_values_lists)
+        pad(daily_values_lists, -1)
     
     # Make each element equal in length so it can be converted to numpy array and the axes
     # can be swapped. Inspired by https://stackoverflow.com/a/26224619.
@@ -276,13 +279,14 @@ def translate_daily_weather_type_lists(days):
 
     return average_weather_types
 
-def prepapre_model_inputs(weather_data, used_features_list=None):
+def prepapre_model_inputs(weather_data, truncate=True, used_features_list=None):
     daily_precipitation, dates = combine_based_on_date(weather_data["quantitativePrecipitation"], return_dates=True)
     daily_snowfall = combine_based_on_date(weather_data["snowfallAmount"])
     daily_snowlevel = combine_based_on_date(weather_data["snowLevel"])
     daily_maxtemp = get_values_list(weather_data["maxTemperature"])
     daily_mintemp = get_values_list(weather_data["minTemperature"])
     daily_avgtemp = combine_based_on_date(weather_data["temperature"], combine_func=avg)
+    daily_avg_wind_speed = combine_based_on_date(weather_data["windSpeed"], combine_func=avg)
     hourly_temp = generate_hourly(weather_data["temperature"], name="Air Temperature", scaling_factor=10)  # model expects celsius (scale 10)
     hourly_snow_depth = generate_hourly(weather_data["snowLevel"], name="Snow Depth", scaling_factor=0.1)  # model expects cm (scale 1)
     hourly_snow_accumulation = generate_hourly(weather_data["snowfallAmount"], name="Snow Accumulation", scaling_factor=0.1)  # model expects cm (scale 1) but NOAA gives mm
@@ -321,6 +325,7 @@ def prepapre_model_inputs(weather_data, used_features_list=None):
         "TMAX": [x*10 for x in daily_maxtemp],  # tenths of degrees C
         "TMIN": [x*10 for x in daily_mintemp],  # tenths of degrees C
         "TAVG": [x*10 for x in daily_avgtemp],  # tenths of degrees C
+        "AWND": [(x/3.6)*10 for x in daily_avg_wind_speed],  # tenths of meters per second (convert from km/h to m/s then convert to tenths)
         **all_date_details_dict,
         **dict(hourly_temp),
         **dict(hourly_snow_depth),
@@ -330,13 +335,21 @@ def prepapre_model_inputs(weather_data, used_features_list=None):
         **dict(daily_weather_types_final),
     }
 
+    model_input_lengths = [x for key, value in model_inputs.items() if (x := len(value)) != 0]
+
+    min_num_days = min(model_input_lengths)
+
+    if truncate:
+        for key in model_inputs:
+            model_inputs[key] = model_inputs[key][:min_num_days]
+
     if used_features_list:
         model_inputs = {key: model_inputs[key] for key in used_features_list}
     
     return model_inputs
 
-weather_data, text_weather = get_weather("12564")
-prepapre_model_inputs(weather_data)
+# weather_data, text_weather = get_weather("12564")
+# prepapre_model_inputs(weather_data)
 
 # PRCP: quantitativePrecipitation - 6 hour intervals combined
 # SNOW: snowfallAmount - 6 hour intervals combined

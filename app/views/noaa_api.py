@@ -11,6 +11,10 @@ def get_weather(zip_code, country='US'):
     weather_data = n.get_forecasts(zip_code, country)
     text_weather = n.get_forecasts(zip_code, country, data_type=None)
 
+    with open("delete.json", "w") as file:
+        import json
+        json.dump(weather_data, file)
+
     return weather_data, text_weather
 
 
@@ -62,11 +66,14 @@ def pad(manipulate):
         for _ in range(24 - len(manipulate[0])):
             manipulate[0].insert(0, current_day_median)
 
-def generate_hourly(weather_data, name):
+def generate_hourly(weather_data, name, scaling_factor=None):
     daily_values_lists = []
     if type(name) is dict and len(name) > 1:
         daily_values_lists = [[] for _ in name]
     previous_date = None
+
+    if not weather_data["values"]:
+        return [("{} Hour {}".format(name, i), [0] * 7) for i in range(24)]
 
     for element in weather_data["values"]:
         time, duration = element["validTime"].split("/")
@@ -100,6 +107,10 @@ def generate_hourly(weather_data, name):
                 else:
                     daily_values_lists[-1].append(element["value"])
     
+    # Apply scaling factor if it is set
+    if scaling_factor:
+        daily_values_lists = [[value * scaling_factor for value in values] for values in daily_values_lists]
+
     # Remove last day because it does not contain data for all hours
     if type(name) is dict:
         for idx, _ in enumerate(name):
@@ -129,7 +140,7 @@ def generate_hourly(weather_data, name):
     if type(name) is dict:
         daily_values_lists = [("{} Hour {}".format(_name, i), x) for name_idx, _name in enumerate(name.values()) for i, x in enumerate(daily_values_lists[name_idx])]
     else:
-        daily_values_lists = [("{} Hour {}".format(name, i), x) for i, x in enumerate(daily_values_lists)]
+        daily_values_lists = [("{} Hour {}".format(name, i), list(x)) for i, x in enumerate(daily_values_lists)]
 
     return daily_values_lists
 
@@ -199,44 +210,133 @@ def process_text_descriptions(text_descriptions, days_to_keep=None):
     # [text_descriptions.pop(k, None) for k in keys_to_remove]
     return final_list
 
+def translate_hourly_observation_data(hourly_observation_data):
+    """Prepare the ``hourly_observation_data`` for input to ML model."""
+    # Translators based on the NOAA degrib specification (https://www.weather.gov/mdl/degrib_ndfdwx)
+    # and the ISD Format Document
+    hourly_observation_data = dict(hourly_observation_data)
+    intensity_translator = {None: 0, "very_light": 1, "light": 1, "moderate": 2, "heavy": 3}
+    columns = ["Present Weather Observation Intensity Hour {}".format(x) for x in range(24)]
+    for column in columns:
+        hourly_observation_data[column] = [intensity_translator[x] if x in intensity_translator else np.nan for x in hourly_observation_data[column]]
 
-# period_text_descriptions = generate_text_descriptions(text_weather)
-# period_text_descriptions = process_text_descriptions(period_text_descriptions)
+    columns = ["Present Weather Observation Descriptor Hour {}".format(x) for x in range(24)]
 
-# daily_precipitation, dates = combine_based_on_date(weather_data["quantitativePrecipitation"], return_dates=True)
-# daily_snowfall = combine_based_on_date(weather_data["snowfallAmount"])
-# daily_snowlevel = combine_based_on_date(weather_data["snowLevel"])
-# daily_maxtemp = get_values_list(weather_data["maxTemperature"])
-# daily_mintemp = get_values_list(weather_data["minTemperature"])
-# daily_avgtemp = combine_based_on_date(weather_data["temperature"], combine_func=avg)
-# hourly_temp = generate_hourly(weather_data["temperature"], name="Air Temperature")
-# hourly_snow_depth = generate_hourly(weather_data["snowLevel"], name="Snow Depth")
-# hourly_snow_accumulation = generate_hourly(weather_data["snowfallAmount"], name="Snow Accumulation")
-# hourly_liquid_precipitation = generate_hourly(weather_data["quantitativePrecipitation"], name="Liquid Precipitation")
-# hourly_observation_data = generate_hourly(weather_data["weather"], name={"coverage": "Coverage", "weather": "Present Weather Observation Descriptor", "intensity": "Present Weather Observation Intensity"})
+    # Copy the list of descriptor data before translation so it can be used in
+    # `translate_daily_weather_type_lists()`
+    descriptor_data_decoded = {key: value for (key, value) in hourly_observation_data.items() if key in columns}
 
-# all_date_details = [get_date_details(date) for date in dates]
-# # Next line inspired by https://stackoverflow.com/a/33046935
-# all_date_details_dict = {k: [dic[k] for dic in all_date_details] for k in all_date_details[0]}
+    precip_columns = ["Present Weather Observation Precipitation Hour {}".format(x) for x in range(24)]
+    precip_translator = {None: 0, "drizzle": 1, "freezing_drizzle": 1, "rain": 2, "rain_showers": 2, "thunderstorms": 2, "freezing_rain": 2, "snow": 3, "snow_showers": 4, "ice_crystals": 5, "ice_pellets": 6}
+    descriptor_translator = {None: 0, "blowing_dust": 5, "blowing_snow": 5, "snow_showers": 6, "rain_showers": 6, "thunderstorms": 7, "freezing_rain": 8, "freezing_drizzle": 8}
+    for column, precip_column in zip(columns, precip_columns):
+        # Create copy of Descriptor items
+        hourly_observation_data[precip_column] = [precip_translator[x] if x in precip_translator else np.nan for x in hourly_observation_data[column]]
+        hourly_observation_data[column] = [descriptor_translator[x] if x in descriptor_translator else np.nan for x in hourly_observation_data[column]]
 
-# model_inputs = {
-#     "PRCP": daily_precipitation,
-#     "SNOW": daily_snowfall,
-#     "SNWD": daily_snowlevel,
-#     "TMAX": [x*10 for x in daily_maxtemp],  # tenths of degrees C
-#     "TMIN": [x*10 for x in daily_mintemp],  # tenths of degrees C
-#     "TAVG": [x*10 for x in daily_avgtemp],  # tenths of degrees C
-#     **all_date_details_dict,
-#     **dict(hourly_temp),
-#     **dict(hourly_snow_depth),
-#     **dict(hourly_snow_accumulation),
-#     **dict(hourly_liquid_precipitation),
-#     **dict(hourly_observation_data),
-# }
+    return hourly_observation_data, descriptor_data_decoded
 
-# model_inputs = {key: model_inputs[key] for key in USED_FEATURES_LIST}
+def create_daily_weather_type_lists(descriptor_data_decoded):
+    descriptor_data_decoded = dict(descriptor_data_decoded)
+    all_daily_values_list = []
+    
+    only_precip_lists = [descriptor_data_decoded[x] for x in descriptor_data_decoded]
+    
+    num_days = min([len(x) for x in only_precip_lists])
+    for day in range(num_days):
+        daily_values_list = []
 
-# input(model_inputs)
+        for precip_column in descriptor_data_decoded:
+            current_day_hour_info = descriptor_data_decoded[precip_column][day]
+            daily_values_list.append(current_day_hour_info)
+
+        all_daily_values_list.append(daily_values_list)
+    
+    return all_daily_values_list
+
+def translate_daily_weather_type_lists(days):
+    average_weather_type_translator = {"fog": "WT01", "ice_fog": "WT01", "freezing_fog": "WT01", "thunderstorms": "WT03", "ice_pellets": "WT05", "haze": "WT08", "smoke": "WT08", "drizzle": "WT13", "rain": "WT16", "rain_showers": "WT16", "freezing_drizzle": "WT16", "freezing_rain": "WT16", "snow": "WT18", "snow_showers": "WT18", "ice_crystals": "WT18", "blowing_snow": "WT18"}
+    average_weather_types = {"WT01": [], "WT03": [], "WT05": [], "WT08": [], "WT13": [], "WT16": [], "WT18": []}
+    
+    for daily_values_list in days:
+        weather_types_found = []
+        for x in daily_values_list:
+            if x in average_weather_type_translator:
+                to_append_key = average_weather_type_translator[x]
+                weather_types_found.append(to_append_key)
+        
+        # Remove duplicates
+        weather_types_found = set(weather_types_found)
+
+        for weather_type in weather_types_found:
+            average_weather_types[weather_type].append(1)
+        not_found_weather_types = [x for x in average_weather_types if x not in weather_types_found]
+        for weather_type in not_found_weather_types:
+            average_weather_types[weather_type].append(0)
+
+    return average_weather_types
+
+def prepapre_model_inputs(weather_data, used_features_list=None):
+    daily_precipitation, dates = combine_based_on_date(weather_data["quantitativePrecipitation"], return_dates=True)
+    daily_snowfall = combine_based_on_date(weather_data["snowfallAmount"])
+    daily_snowlevel = combine_based_on_date(weather_data["snowLevel"])
+    daily_maxtemp = get_values_list(weather_data["maxTemperature"])
+    daily_mintemp = get_values_list(weather_data["minTemperature"])
+    daily_avgtemp = combine_based_on_date(weather_data["temperature"], combine_func=avg)
+    hourly_temp = generate_hourly(weather_data["temperature"], name="Air Temperature", scaling_factor=10)  # model expects celsius (scale 10)
+    hourly_snow_depth = generate_hourly(weather_data["snowLevel"], name="Snow Depth", scaling_factor=0.1)  # model expects cm (scale 1)
+    hourly_snow_accumulation = generate_hourly(weather_data["snowfallAmount"], name="Snow Accumulation", scaling_factor=0.1)  # model expects cm (scale 1) but NOAA gives mm
+    hourly_liquid_precipitation = generate_hourly(weather_data["quantitativePrecipitation"], name="Liquid Precipitation", scaling_factor=10)  # model expects mm (scale 10)
+    hourly_observation_data = generate_hourly(weather_data["weather"], name={"weather": "Present Weather Observation Descriptor", "intensity": "Present Weather Observation Intensity"})
+
+    # Convert `hourly_observation_data` from degrib text values
+    # (https://www.weather.gov/mdl/degrib_ndfdwx) to ISD Present Weather Observation
+    # (indication AU1) codes. Also create `descriptor_data_decoded`, which contains the
+    # values with keys "Present Weather Observation Descriptor Hour 0-23" from
+    # `hourly_observation_data` (these are the values of the "weather" key in NOAA's
+    # API response)
+    hourly_observation_data, descriptor_data_decoded = translate_hourly_observation_data(hourly_observation_data)
+
+    # Reformat the `descriptor_data_decoded` from hour (rows) by day (columns) to
+    # day (rows) by hour (columns).
+    daily_weather_type_list = create_daily_weather_type_lists(descriptor_data_decoded)
+    
+    # Translate list of lists where each list contains the weather observations for the
+    # coresponding day (for example list 0 is day 0) to dictionary with the weather type
+    # keys ("WT01", "WT03", etc.) as keys and the values as lists. Each list contains
+    # the values for one weather type but for all days. For instance, the value 0 of all
+    # items in the dict coresponds to day 0. A value of 1 in a weather type for a day means
+    # that that weather type was present on that day. A value of 0 means it was not present.
+    daily_weather_types_final = translate_daily_weather_type_lists(daily_weather_type_list)
+    
+    # Create date details
+    all_date_details = [get_date_details(date) for date in dates]
+    # Next line inspired by https://stackoverflow.com/a/33046935
+    all_date_details_dict = {k: [dic[k] for dic in all_date_details] for k in all_date_details[0]}
+
+    model_inputs = {
+        "PRCP": [x*10 for x in daily_precipitation],  # tenths of mm
+        "SNOW": daily_snowfall,  # model expects mm and NOAA gives mm
+        "SNWD": daily_snowlevel,  # model expects mm
+        "TMAX": [x*10 for x in daily_maxtemp],  # tenths of degrees C
+        "TMIN": [x*10 for x in daily_mintemp],  # tenths of degrees C
+        "TAVG": [x*10 for x in daily_avgtemp],  # tenths of degrees C
+        **all_date_details_dict,
+        **dict(hourly_temp),
+        **dict(hourly_snow_depth),
+        **dict(hourly_snow_accumulation),
+        **dict(hourly_liquid_precipitation),
+        **dict(hourly_observation_data),
+        **dict(daily_weather_types_final),
+    }
+
+    if used_features_list:
+        model_inputs = {key: model_inputs[key] for key in used_features_list}
+    
+    return model_inputs
+
+weather_data, text_weather = get_weather("12564")
+prepapre_model_inputs(weather_data)
 
 # PRCP: quantitativePrecipitation - 6 hour intervals combined
 # SNOW: snowfallAmount - 6 hour intervals combined

@@ -17,6 +17,9 @@ from app.decorators import *
 from sendgrid.helpers.mail import To, Substitution, Personalization, From
 
 from app.views import noaa_api
+from app.prediction_utils import used_features_list, calculate_predication_date_offset
+
+import pandas as pd
 
 from uszipcode import SearchEngine
 
@@ -92,6 +95,9 @@ scheduler.start()
 # Shut down the scheduler when exiting the app
 atexit.register(lambda: scheduler.shutdown())
 
+import joblib
+model = joblib.load("/path/to/model.joblib")
+
 mainbp = Blueprint('mainbp', __name__)
 
 @mainbp.route('/')
@@ -158,11 +164,29 @@ def predict():
             return json.dumps({**model_prediction, "weather_text": weather_text})
         
         try:
-            weather_data, text_weather = noaa_api.get_weather(form.zip_code.data)
+            weather_data, text_weather, result_object = noaa_api.get_weather("12564", return_result_object=True)
         except ValueError as e:
             return json.dumps({"zip_code": ["Invalid zip code"]}), 400
 
-        prediction = {"percentages": [random.randint(1,100), random.randint(1,100), random.randint(1,100)]}
+        # Prepare model inputs
+        extra_info = {"Latitude": result_object.lat, "Longitude": result_object.lng, "State": result_object.state}
+        model_inputs = noaa_api.prepapre_model_inputs(weather_data, extra_info, used_features_list=used_features_list)
+        offset = calculate_predication_date_offset()
+
+        if offset > 2:
+            return json.dumps("Code 641"), 500
+
+        # Make prediction
+        try:
+            model_inputs["Number of Snowdays in Year"] = [form.num_snowdays.data] * len(model_inputs["Day"])
+            # Convert to DataFrame and reorder the columns according to used_features_list
+            model_inputs = pd.DataFrame(model_inputs)[used_features_list]
+            prediction_probs = model.predict_proba(model_inputs)
+            print(prediction_probs)
+
+            prediction = {"percentages": [int(prediction_probs[0+offset][0]*100), int(prediction_probs[1+offset][0]*100), int(prediction_probs[2+offset][0]*100)]}
+        except:
+            return json.dumps("Code 436"), 500
 
         period_text_descriptions = noaa_api.generate_text_descriptions(text_weather)
         period_text_descriptions = noaa_api.process_text_descriptions(period_text_descriptions)

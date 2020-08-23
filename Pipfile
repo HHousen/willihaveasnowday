@@ -30,6 +30,9 @@ sendgrid = "*"
 pgeocode = "*"
 uszipcode = "*"
 Flask-Minify = "*"
+joblib = "*"
+scikit-learn = "*"
+xgboost = "*"
 
 [dev-packages]
 

@@ -5,16 +5,24 @@ from noaa_sdk import noaa
 import pandas as pd
 import numpy as np
 
-def get_weather(zip_code, country='US'):
+def get_weather(zip_code, country='US', return_result_object=False):
     n = noaa.NOAA(user_agent="Snow Day Predictor <hayden@haydenhousen.com>")
 
-    weather_data = n.get_forecasts(zip_code, country)
+    forecast_response = n.get_forecasts(zip_code, country, return_result_object=return_result_object)
+    
+    if return_result_object:
+        weather_data, result_object = forecast_response
+    else:
+        weather_data = forecast_response
+
     text_weather = n.get_forecasts(zip_code, country, data_type=None)
 
-    with open("delete.json", "w") as file:
-        import json
-        json.dump(weather_data, file)
+    # with open("delete.json", "w") as file:
+    #     import json
+    #     json.dump(weather_data, file)
 
+    if return_result_object:
+        return weather_data, text_weather, result_object
     return weather_data, text_weather
 
 
@@ -279,7 +287,35 @@ def translate_daily_weather_type_lists(days):
 
     return average_weather_types
 
-def prepapre_model_inputs(weather_data, truncate=True, used_features_list=None):
+def add_storm_times(row):
+    storm_start = None
+    storm_end = None
+    no_storm = False
+    last_storm_idx = None
+    
+    for idx, col in enumerate(row):
+        if col == 0:
+            no_storm = True
+        if col > 0:
+            last_storm_idx = idx
+        if col > 0 and not storm_start and not storm_start == 0:
+            storm_start = idx
+        if (storm_start or storm_start == 0) and col == 0 and idx > last_storm_idx+1:
+            storm_end = idx-1
+            break
+    
+    if not storm_start and not storm_start == 0:
+        if no_storm:
+            return -1, -1
+        else:
+            return np.nan, np.nan
+    
+    if (storm_start or storm_start == 0) and (not storm_end):
+        storm_end = 23
+    
+    return storm_start, storm_end
+
+def prepapre_model_inputs(weather_data, extra_info=None, truncate=True, used_features_list=None):
     daily_precipitation, dates = combine_based_on_date(weather_data["quantitativePrecipitation"], return_dates=True)
     daily_snowfall = combine_based_on_date(weather_data["snowfallAmount"])
     daily_snowlevel = combine_based_on_date(weather_data["snowLevel"])
@@ -318,6 +354,13 @@ def prepapre_model_inputs(weather_data, truncate=True, used_features_list=None):
     # Next line inspired by https://stackoverflow.com/a/33046935
     all_date_details_dict = {k: [dic[k] for dic in all_date_details] for k in all_date_details[0]}
 
+    # Create storm start and end times
+    columns = ["Present Weather Observation Precipitation Hour {}".format(x) for x in range(24)]
+    precip_columns = pd.DataFrame(hourly_observation_data)
+    precip_columns = precip_columns[columns]
+    storm_times = precip_columns.apply(add_storm_times, axis=1)
+    storm_times = {"Storm Start Time": [x[0] for x in storm_times.values], "Storm End Time": [x[1] for x in storm_times.values]}
+
     model_inputs = {
         "PRCP": [x*10 for x in daily_precipitation],  # tenths of mm
         "SNOW": daily_snowfall,  # model expects mm and NOAA gives mm
@@ -333,32 +376,36 @@ def prepapre_model_inputs(weather_data, truncate=True, used_features_list=None):
         **dict(hourly_liquid_precipitation),
         **dict(hourly_observation_data),
         **dict(daily_weather_types_final),
+        **dict(storm_times),
     }
 
-    model_input_lengths = [x for key, value in model_inputs.items() if (x := len(value)) != 0]
+    # Fill empty values (most likely will only will SNWD)
+    model_inputs = {key: value if value else [np.nan]*10 for (key, value) in model_inputs.items()}
+    
+    if extra_info:
+        model_inputs = {**model_inputs, **extra_info}
+
+    model_input_lengths = [x for key, value in model_inputs.items() if type(value) is list and (x := len(value)) != 0]
 
     min_num_days = min(model_input_lengths)
 
     if truncate:
         for key in model_inputs:
-            model_inputs[key] = model_inputs[key][:min_num_days]
+            if type(model_inputs[key]) is list:
+                model_inputs[key] = model_inputs[key][:min_num_days]
 
     if used_features_list:
-        model_inputs = {key: model_inputs[key] for key in used_features_list}
+        model_inputs = {key: model_inputs[key] for key in used_features_list if key != "Number of Snowdays in Year"}
     
     return model_inputs
 
-# weather_data, text_weather = get_weather("12564")
-# prepapre_model_inputs(weather_data)
+# weather_data, text_weather, result_object = get_weather("12564", return_result_object=True)
+# extra_info = {"Latitude": result_object.lat, "Longitude": result_object.lng, "State": result_object.state}
+# model_inputs = prepapre_model_inputs(weather_data, extra_info, used_features_list)
 
-# PRCP: quantitativePrecipitation - 6 hour intervals combined
-# SNOW: snowfallAmount - 6 hour intervals combined
-# SNWD: snowLevel - 6 hour intervals combined
-# TMAX: maxTemperature
-# TMIN: minTemperature
-# TAVG: temperature - 1 hour intervals averaged
-# WT18: weather - snow_showers, snow - longest time period in current date that is not null
-# WT22: weather - ice_fog freezing_fog - same as above
-# WT04: weather - ice_pellets - same as above
-# WT01: weather - fog - same as above
-# WT17 - weather - freezing_rain - same as above
+# import joblib
+# model = joblib.load("/home/hhousen/Downloads/model.joblib")
+
+# model_inputs["Number of Snowdays in Year"] = [2] * len(model_inputs["Day"])
+# model_inputs = pd.DataFrame(model_inputs)
+# print(model.predict_proba(model_inputs))

@@ -399,13 +399,21 @@ def prepapre_model_inputs(weather_data, extra_info=None, truncate=True, used_fea
     
     return model_inputs
 
+# import joblib
+# import sys, os
+# sys.path.insert(1, os.path.join(sys.path[0], '..'))
+# from prediction_utils import used_features_list
+
 # weather_data, text_weather, result_object = get_weather("12564", return_result_object=True)
 # extra_info = {"Latitude": result_object.lat, "Longitude": result_object.lng, "State": result_object.state}
 # model_inputs = prepapre_model_inputs(weather_data, extra_info, used_features_list)
 
-# import joblib
-# model = joblib.load("/home/hhousen/Downloads/model.joblib")
+# model = joblib.load("/home/hhousen/Downloads/model2.joblib")
+# print(model.classes_)
 
 # model_inputs["Number of Snowdays in Year"] = [2] * len(model_inputs["Day"])
-# model_inputs = pd.DataFrame(model_inputs)
-# print(model.predict_proba(model_inputs))
+# model_inputs = pd.DataFrame(model_inputs)[used_features_list]
+
+# prediction_proba = model.predict_proba(model_inputs)
+
+# print(prediction_proba[0][0])

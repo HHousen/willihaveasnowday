@@ -5,20 +5,23 @@
 <!-- Primary Meta Tags -->
 <title>Will I Have A Snow Day — AI-powered snow day predictor</title>
 <meta name="title" content="Will I Have A Snow Day — AI-powered snow day predictor">
-<meta name="description" content="The most powerful snow day predictor. With just your zip code, our advanced AI algorithm will calculate your chance of having a snow day.">
+<meta name="description"
+	content="The most powerful snow day predictor. With just your zip code, our advanced AI algorithm will calculate your chance of having a snow day.">
 
 <!-- Open Graph / Facebook -->
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://willihaveasnowday.com/">
 <meta property="og:title" content="Will I Have A Snow Day — AI-powered snow day predictor">
-<meta property="og:description" content="The most powerful snow day predictor. With just your zip code, our advanced AI algorithm will calculate your chance of having a snow day.">
+<meta property="og:description"
+	content="The most powerful snow day predictor. With just your zip code, our advanced AI algorithm will calculate your chance of having a snow day.">
 <meta property="og:image" content="{{ url_for('static', filename='img/social.webp') }}">
 
 <!-- Twitter -->
 <meta property="twitter:card" content="summary_large_image">
 <meta property="twitter:url" content="https://willihaveasnowday.com/">
 <meta property="twitter:title" content="Will I Have A Snow Day — AI-powered snow day predictor">
-<meta property="twitter:description" content="The most powerful snow day predictor. With just your zip code, our advanced AI algorithm will calculate your chance of having a snow day.">
+<meta property="twitter:description"
+	content="The most powerful snow day predictor. With just your zip code, our advanced AI algorithm will calculate your chance of having a snow day.">
 <meta property="twitter:image" content="{{ url_for('static', filename='img/social.webp') }}">
 <script data-ad-client="ca-pub-5688177144759966" async
 	src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
@@ -40,7 +43,8 @@
 		/* 'https://source.unsplash.com/1920x1080/?nature,snow' */
 		display: block;
 		background: #222;
-		background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url({{ background }});
+		background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+		url({{ background }});
 		background-size: cover;
 		width: 110%;
 		height: 110%;
@@ -80,6 +84,7 @@
 	.circular-chart.cc-red .circle {
 		stroke: #C62828;
 	}
+
 	.circular-chart {
 		max-width: 240px;
 	}
@@ -89,6 +94,7 @@
 		font-size: 0.5em;
 		text-anchor: middle;
 	}
+
 	#zip_code {
 		margin-left: 0;
 		margin-right: 2em;
@@ -96,7 +102,7 @@
 		/* width: 100%; */
 	}
 
-	#zip_code ~ label {
+	#zip_code~label {
 		margin-left: 0;
 		margin-right: 2em;
 		/* width: 100%; */
@@ -107,6 +113,7 @@
 		color: rgb(158, 158, 158);
 		cursor: pointer;
 	}
+
 	.icn-spinner {
 		animation: spin-animation 1.5s infinite linear;
 		display: inline-block;
@@ -116,6 +123,7 @@
 		0% {
 			transform: rotate(359deg);
 		}
+
 		100% {
 			transform: rotate(0deg);
 		}
@@ -183,74 +191,79 @@
 			</div>
 		</div>
 
-		<div id="results-panel" class="row center" style="display: none;margin-top: 20px;">
-			<div class="row">
-				<a id="go-back-btn" class="waves-effect btn-flat waves-light left" style="color: rgba(255,255,255,.9);">
-					<i class="material-icons left">arrow_back</i>
-					Go Back
-				</a>
-				<a id="refresh-btn" class="waves-effect btn-flat waves-light left" style="color: rgba(255,255,255,.9);">
-					<i class="material-icons left">refresh</i>
-					Update Prediction
-				</a>
-				<a id="help-improve-btn" class="waves-effect waves-light btn right modal-trigger"
-					href="#help-improve"><i class="material-icons left">help_outline</i>Help Improve This Prediction</a>
-			</div>
-
-			<div class="row valign-wrapper-med-up">
+		<div id="results-panel" class="row center valign-wrapper-med-up" style="display: none;">
+			<div class="row center">
+				<div class="row">
+					<a id="go-back-btn" class="waves-effect btn-flat waves-light left"
+						style="color: rgba(255,255,255,.9);">
+						<i class="material-icons left">arrow_back</i>
+						Go Back
+					</a>
+					<a id="refresh-btn" class="waves-effect btn-flat waves-light left"
+						style="color: rgba(255,255,255,.9);">
+						<i class="material-icons left">refresh</i>
+						Update Prediction
+					</a>
+					<a id="help-improve-btn" class="waves-effect waves-light btn right modal-trigger"
+						href="#help-improve"><i class="material-icons left">help_outline</i>Help Improve This
+						Prediction</a>
+				</div>
 
 				<div class="row">
-					<div class="col s12 m6 l4">
-						<div id="day-0-card" class="card orange darken-4">
-							<div class="card-content white-text">
-								<svg viewBox="0 0 36 36" class="circular-chart cc-red" style="width: 70%;">
-									<path class="circle-bg" d="M18 2.0845
-										a 15.9155 15.9155 0 0 1 0 31.831
-										a 15.9155 15.9155 0 0 1 0 -31.831" />
-									<path class="circle" stroke-dasharray="0, 100" d="M18 2.0845
-										a 15.9155 15.9155 0 0 1 0 31.831
-										a 15.9155 15.9155 0 0 1 0 -31.831" />
-									<text x="18" y="20.35" class="percentage">Loading</text>
-								</svg>
-								<span class="card-title">Loading...</span>
-								<p><strong id="day-0-percentage-text">Loading</strong>% chance of a snow day.</p>
-								<p id="day-0-text">Loading...</p>
+
+					<div class="row">
+						<div class="col s12 m6 l4">
+							<div id="day-0-card" class="card orange darken-4">
+								<div class="card-content white-text">
+									<svg viewBox="0 0 36 36" class="circular-chart cc-red" style="width: 70%;">
+										<path class="circle-bg" d="M18 2.0845
+											a 15.9155 15.9155 0 0 1 0 31.831
+											a 15.9155 15.9155 0 0 1 0 -31.831" />
+										<path class="circle" stroke-dasharray="0, 100" d="M18 2.0845
+											a 15.9155 15.9155 0 0 1 0 31.831
+											a 15.9155 15.9155 0 0 1 0 -31.831" />
+										<text x="18" y="20.35" class="percentage">Loading</text>
+									</svg>
+									<span class="card-title">Loading...</span>
+									<p><strong id="day-0-percentage-text">Loading</strong>% chance of a snow day.</p>
+									<p id="day-0-text">Loading...</p>
+								</div>
 							</div>
 						</div>
-					</div>
-					<div class="col s12 m6 l4">
-						<div id="day-1-card" class="card orange darken-3">
-							<div class="card-content white-text">
-								<svg viewBox="0 0 36 36" class="circular-chart cc-red" style="width: 70%;">
-									<path class="circle-bg" d="M18 2.0845
-										a 15.9155 15.9155 0 0 1 0 31.831
-										a 15.9155 15.9155 0 0 1 0 -31.831" />
-									<path class="circle" stroke-dasharray="0, 100" d="M18 2.0845
-										a 15.9155 15.9155 0 0 1 0 31.831
-										a 15.9155 15.9155 0 0 1 0 -31.831" />
-									<text x="18" y="20.35" class="percentage">Loading</text>
-								</svg>
-								<span class="card-title">Loading...</span>
-								<p><strong id="day-1-percentage-text">Loading</strong>% chance of a snow day.</p>
-								<p id="day-1-text">Loading...</p>
+						<div class="col s12 m6 l4">
+							<div id="day-1-card" class="card orange darken-3">
+								<div class="card-content white-text">
+									<svg viewBox="0 0 36 36" class="circular-chart cc-red" style="width: 70%;">
+										<path class="circle-bg" d="M18 2.0845
+											a 15.9155 15.9155 0 0 1 0 31.831
+											a 15.9155 15.9155 0 0 1 0 -31.831" />
+										<path class="circle" stroke-dasharray="0, 100" d="M18 2.0845
+											a 15.9155 15.9155 0 0 1 0 31.831
+											a 15.9155 15.9155 0 0 1 0 -31.831" />
+										<text x="18" y="20.35" class="percentage">Loading</text>
+									</svg>
+									<span class="card-title">Loading...</span>
+									<p><strong id="day-1-percentage-text">Loading</strong>% chance of a snow day.</p>
+									<p id="day-1-text">Loading...</p>
+								</div>
 							</div>
 						</div>
-					</div>
-					<div class="col s12 m6 l4">
-						<div id="day-2-card" class="card orange darken-2">
-							<div class="card-content white-text">
-								<svg viewBox="0 0 36 36" class="circular-chart cc-red" style="width: 70%;">
-									<path class="circle-bg" d="M18 2.0845
-										a 15.9155 15.9155 0 0 1 0 31.831
-										a 15.9155 15.9155 0 0 1 0 -31.831" />
-									<path class="circle" stroke-dasharray="0, 100" d="M18 2.0845
-										a 15.9155 15.9155 0 0 1 0 31.831
-										a 15.9155 15.9155 0 0 1 0 -31.831" />
-									<text x="18" y="20.35" class="percentage">Loading</text>
-								</svg>
-								<span class="card-title">Loading...</span>
-								<p><strong id="day-2-percentage-text">Loading</strong>% chance of a snow day.</p>
-								<p id="day-2-text">Loading...</p>
+						<div class="col s12 m6 l4">
+							<div id="day-2-card" class="card orange darken-2">
+								<div class="card-content white-text">
+									<svg viewBox="0 0 36 36" class="circular-chart cc-red" style="width: 70%;">
+										<path class="circle-bg" d="M18 2.0845
+											a 15.9155 15.9155 0 0 1 0 31.831
+											a 15.9155 15.9155 0 0 1 0 -31.831" />
+										<path class="circle" stroke-dasharray="0, 100" d="M18 2.0845
+											a 15.9155 15.9155 0 0 1 0 31.831
+											a 15.9155 15.9155 0 0 1 0 -31.831" />
+										<text x="18" y="20.35" class="percentage">Loading</text>
+									</svg>
+									<span class="card-title">Loading...</span>
+									<p><strong id="day-2-percentage-text">Loading</strong>% chance of a snow day.</p>
+									<p id="day-2-text">Loading...</p>
+								</div>
 							</div>
 						</div>
 					</div>

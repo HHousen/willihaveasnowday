@@ -315,6 +315,10 @@ def add_storm_times(row):
     
     return storm_start, storm_end
 
+def make_times(num_days):
+    today = datetime.datetime.today().replace(minute=0, hour=0, second=0, microsecond=0)
+    return [int((today + datetime.timedelta(day)).timestamp()) for day in range(num_days)]
+
 def prepapre_model_inputs(weather_data, extra_info=None, truncate=True, used_features_list=None):
     daily_precipitation, dates = combine_based_on_date(weather_data["quantitativePrecipitation"], return_dates=True)
     daily_snowfall = combine_based_on_date(weather_data["snowfallAmount"])
@@ -362,6 +366,7 @@ def prepapre_model_inputs(weather_data, extra_info=None, truncate=True, used_fea
     storm_times = {"Storm Start Time": [x[0] for x in storm_times.values], "Storm End Time": [x[1] for x in storm_times.values]}
 
     model_inputs = {
+        "Elapsed": make_times(7),
         "PRCP": [x*10 for x in daily_precipitation],  # tenths of mm
         "SNOW": daily_snowfall,  # model expects mm and NOAA gives mm
         "SNWD": daily_snowlevel,  # model expects mm
@@ -411,7 +416,7 @@ def prepapre_model_inputs(weather_data, extra_info=None, truncate=True, used_fea
 # model = joblib.load("/home/hhousen/Downloads/model2.joblib")
 # print(model.classes_)
 
-# model_inputs["Number of Snowdays in Year"] = [2] * len(model_inputs["Day"])
+# model_inputs["Number of Snowdays in Year"] = [2] * len(model_inputs[used_features_list[0]])
 # model_inputs = pd.DataFrame(model_inputs)[used_features_list]
 
 # prediction_proba = model.predict_proba(model_inputs)

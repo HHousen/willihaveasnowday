@@ -27,6 +27,9 @@ import atexit
 import time
 from apscheduler.schedulers.background import BackgroundScheduler
 
+import joblib
+model = joblib.load("/path/to/model.joblib")
+
 with open("app/index_backgrounds_base64.txt", "r") as file:
     index_backgrounds_base64 = file.readlines()
 
@@ -95,9 +98,6 @@ scheduler.start()
 # Shut down the scheduler when exiting the app
 atexit.register(lambda: scheduler.shutdown())
 
-import joblib
-model = joblib.load("/path/to/model.joblib")
-
 mainbp = Blueprint('mainbp', __name__)
 
 @mainbp.route('/')
@@ -141,6 +141,10 @@ def predict():
     form = predict_forms.Predict()
     
     if form.validate_on_submit():
+        today = dt.datetime.now()
+        if today.month in (7, 8):
+            return json.dumps({"percentages": [0, 0, 0], "weather_text": None})
+
         last_prediction = PreditionReport.get_recent_prediction(form.zip_code.data)
         if last_prediction is not None:
             if current_user.is_authenticated:
@@ -178,11 +182,10 @@ def predict():
 
         # Make prediction
         try:
-            model_inputs["Number of Snowdays in Year"] = [form.num_snowdays.data] * len(model_inputs["Day"])
+            model_inputs["Number of Snowdays in Year"] = [form.num_snowdays.data] * len(model_inputs[used_features_list[0]])
             # Convert to DataFrame and reorder the columns according to used_features_list
             model_inputs = pd.DataFrame(model_inputs)[used_features_list]
             prediction_probs = model.predict_proba(model_inputs)
-            print(prediction_probs)
 
             prediction = {"percentages": [int(prediction_probs[0+offset][0]*100), int(prediction_probs[1+offset][0]*100), int(prediction_probs[2+offset][0]*100)]}
         except:
@@ -219,6 +222,8 @@ def help_improve():
     form = help_forms.Help()
     if form.validate_on_submit():
         unauth_user = UnauthUser.query.filter_by(uuid=session['id']).first()
+        if unauth_user is None:
+            return "User Not Found", 500
         unauth_user.email = form.email.data
         db.session.commit()
 

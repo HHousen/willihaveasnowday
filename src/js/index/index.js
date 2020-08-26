@@ -91,6 +91,9 @@ $(document).ready(function () {
 
     function processAjaxErrors(error_dict) {
         for (var key of Object.keys(error_dict)) {
+            M.toast({
+                html: key + ': ' + error_dict[key]
+            });
             var form_element = $("#" + key).parent();
             var prev_helper_text = form_element.find('.helper-text');
             var new_error = $(
@@ -165,11 +168,17 @@ $(document).ready(function () {
             url: form_url,
             data: form_data,
             success: function (data) {
+                data = JSON.parse(data)
                 last_prediction_time = new Date(); // Only update the prediction time on success
                 last_zip_code = zip_code;
                 stopAnimateProgressBar();
-                successHelper();
-                createResults(JSON.parse(data));
+                if (data.weather_text == null) {
+                    extra_text = " It's the summer. There is no chance of a snow day since there is no school."
+                } else {
+                    extra_text = ""
+                }
+                successHelper(extra_text);
+                createResults(data);
             },
             error: function (request, status, error) {
                 stopAnimateProgressBar();
@@ -246,14 +255,20 @@ $(document).ready(function () {
                 $("#day-" + i + "-percentage-text").text(element);
             }
 
-            for (let i = 0; i < data.weather_text.length; i++) {
-                const element = data.weather_text[i];
-                new_html = "";
-                element.forEach(function (period, index) {
-                    new_html += "<strong>" + period["name"] + "</strong>: ";
-                    new_html += truncate(period["detailedForecast"], 100) + "<br>";
-                });
-                $("#day-" + i + "-text").html(new_html);
+            if (data.weather_text == null) {
+                for (let i = 0; i < 3; i++) {
+                    $("#day-" + i + "-text").html("");
+                }
+            } else {
+                for (let i = 0; i < data.weather_text.length; i++) {
+                    const element = data.weather_text[i];
+                    new_html = "";
+                    element.forEach(function (period, index) {
+                        new_html += "<strong>" + period["name"] + "</strong>: ";
+                        new_html += truncate(period["detailedForecast"], 100) + "<br>";
+                    });
+                    $("#day-" + i + "-text").html(new_html);
+                }
             }
 
             $("#results-panel").fadeIn("slow", function () {

@@ -190,7 +190,7 @@ def predict():
         
         # today = dt.datetime.now()
         # if today.month in (7, 8):
-        #     return json.dumps({"percentages": [0, 0, 0], "weather_text": None})
+        #     return json.dumps({"percentages": [0, 0, 0], "weather_text": "summer"})
 
         recent_prediction = check_for_recent_prediction(form.zip_code.data, unauth_user)
         if recent_prediction:

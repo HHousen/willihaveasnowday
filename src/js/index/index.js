@@ -172,7 +172,7 @@ $(document).ready(function () {
                 last_prediction_time = new Date(); // Only update the prediction time on success
                 last_zip_code = zip_code;
                 stopAnimateProgressBar();
-                if (data.weather_text == null) {
+                if (data.weather_text == "summer") {
                     extra_text = " It's the summer. There is no chance of a snow day since there is no school."
                 } else {
                     extra_text = ""

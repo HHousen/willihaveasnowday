@@ -17,6 +17,12 @@ exports.plugins = {
     },
     postcss: {
         processors: [require('autoprefixer')]
+    },
+    terser: {
+        mangle: true,
+        compress: {
+            global_defs: {DEBUG: false,},
+        },
     }
 };
 

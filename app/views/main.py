@@ -30,10 +30,17 @@ from apscheduler.schedulers.background import BackgroundScheduler
 import joblib
 model = joblib.load("/path/to/model.joblib")
 
+# Create the list that holds zip codes that the model is currently processing.
+# This is used so that if two people predict for the same zip code at the same time
+# the model will not process the weather data twice. Instead, the later prediction
+# request will be wait until an entry is added in the database for that zip code
+# in the last hour using the `PreditionReport.get_recent_prediction()` function.
+currently_running_zip_codes = []
+
 with open("app/index_backgrounds_base64.txt", "r") as file:
     index_backgrounds_base64 = file.readlines()
 
-def create_follow_up_email(prediction_id, zip_code, user, ts, extra):
+def create_follow_up_email(prediction_id, zip_code, user, first_prediction_date, ts, extra):
     start_token = str(extra) + "-" + str(prediction_id) + "-" + str(user.id)
     yes_token = ts.dumps(start_token + "-1", salt=current_app.config['SNOWDAY_STATUS_SALT'])
     yes_url = url_for('mainbp.snowday_status', token=yes_token, _external=True)
@@ -44,7 +51,8 @@ def create_follow_up_email(prediction_id, zip_code, user, ts, extra):
     to_object = To(email=user.email, substitutions=[
         Substitution('((yes_url))', yes_url, p),
         Substitution('((no_url))', no_url, p),
-        Substitution('((zip_code))', zip_code)
+        Substitution('((zip_code))', zip_code),
+        Substitution('((date))', first_prediction_date.strftime('%Y-%m-%d'))
     ])
     p.add_to(to_object)
 
@@ -53,15 +61,19 @@ def create_follow_up_email(prediction_id, zip_code, user, ts, extra):
 def send_follow_up_emails():
     ts = URLSafeTimedSerializer(current_app.config['SECRET_KEY'])
     
-    today = dt.datetime.today().replace(hour=12, minute=0, second=0).strftime('%Y-%m-%d %H:%M:%S')
-    yesterday = (dt.datetime.now() - dt.timedelta(1)).replace(hour=12, minute=0, second=0).strftime('%Y-%m-%d %H:%M:%S')
+    current_date = dt.date.today()
+    # today = dt.datetime.today().replace(hour=12, minute=0, second=0).strftime('%Y-%m-%d %H:%M:%S')
+    # yesterday = (dt.datetime.now() - dt.timedelta(1)).replace(hour=12, minute=0, second=0).strftime('%Y-%m-%d %H:%M:%S')
     
     to_emails = []
     distinct_zip_codes = PreditionReport.query.with_entities(PreditionReport.zip_code).distinct().all()
     distinct_zip_codes = [x[0] for x in distinct_zip_codes]
 
     for zip_code in distinct_zip_codes:
-        predictions = PreditionReport.query.filter(PreditionReport.created_at.between(yesterday, today), PreditionReport.emailed == False, PreditionReport.zip_code == zip_code).all()
+        predictions = PreditionReport.query.filter(PreditionReport.first_prediction_date == current_date, PreditionReport.emailed == False, PreditionReport.zip_code == zip_code).all()
+        # predictions = PreditionReport.query.filter(PreditionReport.created_at.between(yesterday, today), PreditionReport.emailed == False, PreditionReport.zip_code == zip_code).all()
+
+        # current_date = predictions[0].first_prediction_date
 
         users = set([assoc.user_rel for prediction in predictions for assoc in prediction.users_ids])
         unauth_users = set([assoc.unauth_user_rel for prediction in predictions for assoc in prediction.unauth_users_ids])
@@ -70,17 +82,17 @@ def send_follow_up_emails():
         predictions_ids_tokenized = ",".join(predictions_ids)
 
         for user in users:
-            p = create_follow_up_email(predictions_ids_tokenized, zip_code, user, ts, extra="full")
+            p = create_follow_up_email(predictions_ids_tokenized, zip_code, user, current_date, ts, extra="full")
             to_emails.append(p)
         for unauth_user in unauth_users:
-            p = create_follow_up_email(predictions_ids_tokenized, zip_code, unauth_user, ts, extra="un")
+            p = create_follow_up_email(predictions_ids_tokenized, zip_code, unauth_user, current_date, ts, extra="un")
             to_emails.append(p)
         
         for prediction in predictions:
             prediction.emailed = True
             db.session.commit()
     
-    html = render_template('email/improve.html')
+    html = render_template('email/improve.html', signed_in=current_user.is_authenticated)
     email.send(
         recipient=None,
         personalizations=to_emails,
@@ -92,7 +104,7 @@ def send_follow_up_emails():
 
 
 scheduler = BackgroundScheduler()
-scheduler.add_job(func=send_follow_up_emails, trigger="cron", hour=15, minute=58)
+scheduler.add_job(func=send_follow_up_emails, trigger="cron", hour=15, minute=57, day_of_week="0-4", jitter=120)
 scheduler.start()
 
 # Shut down the scheduler when exiting the app
@@ -130,6 +142,32 @@ def reverse_geocode():
     
     return "Incorrect data type submitted", 400
 
+def check_for_recent_prediction(zip_code, unauth_user):
+    last_prediction = PreditionReport.get_recent_prediction(zip_code)
+    if last_prediction is not None:
+        if current_user.is_authenticated:
+            last_prediction_associated_user_ids = [x.user_rel.id for x in last_prediction.users_ids]
+            if current_user.id not in last_prediction_associated_user_ids:
+                user_predictions = UserPredictions()
+                user_predictions.user_rel = current_user
+                user_predictions.report = last_prediction
+                last_prediction.users_ids.append(user_predictions)
+                db.session.commit()
+        else:
+            last_prediction_associated_unauthuser_ids = [x.unauth_user_rel.id for x in last_prediction.unauth_users_ids]
+            if unauth_user.id not in last_prediction_associated_unauthuser_ids:
+                user_predictions = UnauthUserPredictions()
+                user_predictions.unauth_user_rel = unauth_user
+                user_predictions.report = last_prediction
+                last_prediction.unauth_users_ids.append(user_predictions)
+                db.session.commit()
+        model_prediction = json.loads(last_prediction.model_prediction)
+        weather_text = json.loads(last_prediction.weather_text)
+        return json.dumps({**model_prediction, "weather_text": weather_text})
+    
+    return False
+
+
 @mainbp.route('/predict', methods=['POST'])
 @limiter.limit("4 per minute")
 def predict():
@@ -141,43 +179,38 @@ def predict():
     form = predict_forms.Predict()
     
     if form.validate_on_submit():
-        today = dt.datetime.now()
-        if today.month in (7, 8):
-            return json.dumps({"percentages": [0, 0, 0], "weather_text": None})
-
-        last_prediction = PreditionReport.get_recent_prediction(form.zip_code.data)
-        if last_prediction is not None:
-            if current_user.is_authenticated:
-                last_prediction_associated_user_ids = [x.user_rel.id for x in last_prediction.users_ids]
-                if current_user.id not in last_prediction_associated_user_ids:
-                    user_predictions = UserPredictions()
-                    user_predictions.user_rel = current_user
-                    user_predictions.report = last_prediction
-                    last_prediction.users_ids.append(user_predictions)
-                    db.session.commit()
-            else:
-                last_prediction_associated_unauthuser_ids = [x.unauth_user_rel.id for x in last_prediction.unauth_users_ids]
-                if unauth_user.id not in last_prediction_associated_unauthuser_ids:
-                    user_predictions = UnauthUserPredictions()
-                    user_predictions.unauth_user_rel = unauth_user
-                    user_predictions.report = last_prediction
-                    last_prediction.unauth_users_ids.append(user_predictions)
-                    db.session.commit()
-            model_prediction = json.loads(last_prediction.model_prediction)
-            weather_text = json.loads(last_prediction.weather_text)
-            return json.dumps({**model_prediction, "weather_text": weather_text})
+        if form.zip_code.data in currently_running_zip_codes:
+            timeout_start = time.time()
+            while time.time() < timeout_start + 20:
+                time.sleep(0.8)
+                recent_prediction = check_for_recent_prediction(form.zip_code.data, unauth_user)
+                if recent_prediction:
+                    return recent_prediction
+            return json.dumps("Code 878"), 500
         
+        # today = dt.datetime.now()
+        # if today.month in (7, 8):
+        #     return json.dumps({"percentages": [0, 0, 0], "weather_text": None})
+
+        recent_prediction = check_for_recent_prediction(form.zip_code.data, unauth_user)
+        if recent_prediction:
+            return recent_prediction
+
+        currently_running_zip_codes.append(form.zip_code.data)
+
         try:
             weather_data, text_weather, result_object = noaa_api.get_weather("12564", return_result_object=True)
         except ValueError as e:
+            currently_running_zip_codes.remove(form.zip_code.data)
             return json.dumps({"zip_code": ["Invalid zip code"]}), 400
 
         # Prepare model inputs
         extra_info = {"Latitude": result_object.lat, "Longitude": result_object.lng, "State": result_object.state}
         model_inputs = noaa_api.prepapre_model_inputs(weather_data, extra_info, used_features_list=used_features_list)
-        offset = calculate_predication_date_offset()
+        offset, first_prediction_date = calculate_predication_date_offset()
 
         if offset > 2:
+            currently_running_zip_codes.remove(form.zip_code.data)
             return json.dumps("Code 641"), 500
 
         # Make prediction
@@ -189,6 +222,7 @@ def predict():
 
             prediction = {"percentages": [int(prediction_probs[0+offset][0]*100), int(prediction_probs[1+offset][0]*100), int(prediction_probs[2+offset][0]*100)]}
         except:
+            currently_running_zip_codes.remove(form.zip_code.data)
             return json.dumps("Code 436"), 500
 
         period_text_descriptions = noaa_api.generate_text_descriptions(text_weather)
@@ -200,6 +234,7 @@ def predict():
             weather_info=0,
             model_prediction=json.dumps(prediction),
             weather_text=json.dumps(period_text_descriptions),
+            first_prediction_date=first_prediction_date,
         )
         if current_user.is_authenticated:
             user_predictions = UserPredictions()
@@ -213,6 +248,7 @@ def predict():
         db.session.add(report)
         db.session.commit()
 
+        currently_running_zip_codes.remove(form.zip_code.data)
         return json.dumps({**prediction, "weather_text": period_text_descriptions})
     
     return json.dumps(form.errors), 400
@@ -232,6 +268,7 @@ def help_improve():
     return json.dumps(form.errors), 400
 
 @mainbp.route('/snowday-status/<token>')
+@limiter.limit("2 per minute")
 def snowday_status(token):
     ts = URLSafeTimedSerializer(current_app.config['SECRET_KEY'])
     try:
@@ -252,7 +289,8 @@ def snowday_status(token):
                 statuses.append(association.snowday_status)
                 association.snowday_status = response
         
-        if not all(statuses):
+        all_statuses_are_none = all([x is None for x in statuses])
+        if all_statuses_are_none:
             flash("Response recorded successfully and points awarded.")
             association.user_rel.points += 1
         else:
@@ -264,8 +302,9 @@ def snowday_status(token):
             if association is not None:
                 statuses.append(association.snowday_status)
                 association.snowday_status = response
-            
-        if not all(statuses):
+        
+        all_statuses_are_none = all([x is None for x in statuses])
+        if all_statuses_are_none:
             flash("Response recorded successfully.")
         else:
             flash("Response updated.")

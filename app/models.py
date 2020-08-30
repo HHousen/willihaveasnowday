@@ -83,13 +83,14 @@ class PreditionReport(db.Model):
     __tablename__ = 'prediction_log'
 
     id = db.Column(db.Integer, primary_key=True)
-    created_at = db.Column(db.DateTime(), unique=True, nullable=False, default=dt.datetime.utcnow)
+    created_at = db.Column(db.DateTime(), unique=True, nullable=False, default=dt.datetime.now)
     zip_code = db.Column(db.Integer(), nullable=False)
     num_snowdays = db.Column(db.Integer(), nullable=False)
     weather_info = db.Column(db.String(100), nullable=False)
     model_prediction = db.Column(db.String(30), nullable=False)
     emailed = db.Column(db.Boolean(), nullable=False, default=False)
     weather_text = db.Column(db.String(200), nullable=True)
+    first_prediction_date = db.Column(db.Date(), nullable=False)
 
     unauth_users_ids = relationship("UnauthUserPredictions", back_populates="report")
     users_ids = relationship("UserPredictions", back_populates="report")

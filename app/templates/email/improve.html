@@ -1,6 +1,6 @@
 <p>WillIHaveASnowDay.com</p>
 
-<p>Please click one of the buttons below to confirm if our prediction for zip code <strong>((zip_code))</strong> was correct:</p>
+<p>Please click one of the buttons below to confirm if our prediction for <strong>((date))</strong> at zip code <strong>((zip_code))</strong> was correct:</p>
 
 <div><!--[if mso]>
     <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="{{yes_url}}" style="height:40px;v-text-anchor:middle;width:150px;" arcsize="10%" stroke="f" fillcolor="#ef6c00">
@@ -31,7 +31,9 @@
 </div>
 
 
-<p>
---<br>
-WillIHaveASnowDay.com
-</p>
+{% if not signed_in %}
+<p>If you would like to keep track of your contributions and see your rank on the <a href="https://willihaveasnowday.com/leaderboard">leaderboard</a> then <a href="https://willihaveasnowday.com/user/signup">sign up for an account</a>.</p>
+{% endif %}
+
+<p>Thank you for your contribution,</p>
+<p>WillIHaveASnowDay.com</p>

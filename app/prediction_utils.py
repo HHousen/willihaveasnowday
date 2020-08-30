@@ -66,4 +66,4 @@ def calculate_predication_date_offset():
         date = date + datetime.timedelta(1)
         offset += 1
 
-    return offset
+    return offset, date.date()

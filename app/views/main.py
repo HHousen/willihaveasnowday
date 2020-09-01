@@ -4,6 +4,7 @@ from flask import render_template, session, jsonify, Blueprint, flash, abort, cu
 from flask_login import current_user
 from itsdangerous import URLSafeTimedSerializer
 from app import app
+from app.custom_errors import PredictionError
 from app.models import PreditionReport, UnauthUser, UnauthUserPredictions, UserPredictions, User
 import random
 import datetime as dt
@@ -186,7 +187,7 @@ def predict():
                 recent_prediction = check_for_recent_prediction(form.zip_code.data, unauth_user)
                 if recent_prediction:
                     return recent_prediction
-            return json.dumps("Code 878"), 500
+            raise PredictionError("Code 878")
         
         # today = dt.datetime.now()
         # if today.month in (7, 8):
@@ -211,7 +212,7 @@ def predict():
 
         if offset > 2:
             currently_running_zip_codes.remove(form.zip_code.data)
-            return json.dumps("Code 641"), 500
+            raise PredictionError("Code 641")
 
         # Make prediction
         try:
@@ -221,9 +222,9 @@ def predict():
             prediction_probs = model.predict_proba(model_inputs)
 
             prediction = {"percentages": [int(prediction_probs[0+offset][0]*100), int(prediction_probs[1+offset][0]*100), int(prediction_probs[2+offset][0]*100)]}
-        except:
+        except Exception as e:
             currently_running_zip_codes.remove(form.zip_code.data)
-            return json.dumps("Code 436"), 500
+            raise PredictionError("Code 436") from e
 
         period_text_descriptions = noaa_api.generate_text_descriptions(text_weather)
         period_text_descriptions = noaa_api.process_text_descriptions(period_text_descriptions)

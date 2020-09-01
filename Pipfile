@@ -41,3 +41,6 @@ python_version = "3.8"
 
 [packages.noaa-sdk]
 git = "https://github.com/HHousen/noaa.git"
+
+[packages.sentry-sdk]
+extras = [ "flask",]

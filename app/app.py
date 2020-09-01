@@ -4,11 +4,20 @@ from app.views import user, main
 from app.models import User
 from app.extensions import bcrypt, db, toolbar, login_manager, mail, moment, limiter, minifier
 from app.logger_setup import logger_setup
+from app.custom_errors import PredictionError
+import json
 import os.path as op
+
+import sentry_sdk
+from sentry_sdk import capture_exception
+from sentry_sdk import last_event_id
+from sentry_sdk.integrations.flask import FlaskIntegration
+from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
 
 def create_app(config_object='app.settings'):
     app = Flask(__name__.split('.')[0])
     app.config.from_object(config_object)
+    setup_sentry()
     register_extensions(app)
     register_blueprints(app)
     register_admins(app)
@@ -53,8 +62,18 @@ def register_errorhandlers(app):
         # If a HTTPException, pull the `code` attribute; default to 500
         error_code = getattr(error, 'code', 500)
         return render_template('error.html', message=error_code, title=error_code), error_code
-    for errcode in [401, 404, 410, 500]:
+    for errcode in [401, 404, 410]:
         app.errorhandler(errcode)(render_error)
+    
+    def error_500(error):
+        return render_template("error.html", message=500, title=500, sentry_event_id=last_event_id()), 500
+    app.register_error_handler(500, error_500)
+
+    def handle_prediction_error(error):
+        capture_exception(error)
+        return json.dumps(str(error)), 500
+    app.register_error_handler(PredictionError, handle_prediction_error)
+    
     return None
 
 def register_shellcontext(app):
@@ -70,3 +89,10 @@ def register_commands(app):
     app.cli.add_command(commands.initdb)
     app.cli.add_command(commands.dropdb)
     app.cli.add_command(commands.recycledb)
+
+def setup_sentry():
+    sentry_sdk.init(
+        dsn="https://24a7630bb63a406ea1f8193521d8ffb9@o441797.ingest.sentry.io/5412553",
+        integrations=[FlaskIntegration(), SqlalchemyIntegration()],
+        traces_sample_rate=1.0
+    )

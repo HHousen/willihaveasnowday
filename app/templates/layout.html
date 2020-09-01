@@ -25,6 +25,12 @@
 
 		gtag('config', 'UA-55408421-10');
 	</script>
+	<script src="https://browser.sentry-cdn.com/5.22.3/bundle.tracing.min.js"
+		integrity="sha384-HfEJlGrJtFM0B01Wt4sGzTbxWqLMcMeGAXCbyQyB+iK9BhnDmNAtIGovhekIQOa2" crossorigin="anonymous">
+	</script>
+	<script>
+		Sentry.init({ dsn: "https://24a7630bb63a406ea1f8193521d8ffb9@o441797.ingest.sentry.io/5412553" });
+	</script>
 	{% endblock %}
 </head>
 <body>

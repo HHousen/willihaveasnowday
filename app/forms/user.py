@@ -59,12 +59,8 @@ class SignUp(FlaskForm):
 
     ''' User sign up form. '''
 
-    first_name = TextField(validators=[Required(), Length(min=2)],
-                     description='First name')
-    last_name = TextField(validators=[Required(), Length(min=2)],
-                        description='Last name')
-    phone = TextField(validators=[Required(), Length(min=6)],
-                      description='Phone number')
+    username = TextField(validators=[Required(), Length(min=2, max=30)],
+                     description='Username')
     email = TextField(validators=[Required(), Email(),
                                   Unique(User, User.email,
                                          'This email address is ' +

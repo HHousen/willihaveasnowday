@@ -9,11 +9,9 @@
         <div class="container">
             <div class="row center">
                 <img class="circle" src="{{ current_user.avatar(128) }}">
-                <h3>{{ current_user.full_name | title }}</h3>
+                <h3>{{ current_user.username }}</h3>
                 <p>Points: {{ current_user.points }} <a class="modal-trigger" href="#points-info"><i class="material-icons">help_outline</i></a></p>
                 <p>Leaderboard Rank: {{ current_user.rank }} <a class="modal-trigger" href="#rank-info"><i class="material-icons">help_outline</i></a></p>
-                <p>Credits: {{ current_user.credits }}</p>
-                <a href="{{ url_for('userbp.pay') }}" class="waves-effect waves-light btn">Buy More Credits</a>
                 {% if current_user.rank == 1 %}
                 <p>Congrats on being first on the leaderboard! Here's a cute cat gif.</p>
                 <img src="https://cataas.com/cat/gif?type=or" alt="Cute cat gif">

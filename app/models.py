@@ -17,9 +17,7 @@ class User(db.Model, UserMixin):
     __tablename__ = 'users'
 
     id = db.Column(db.Integer, primary_key=True, unique=True, nullable=False)
-    first_name = db.Column(db.String(30), nullable=True)
-    last_name = db.Column(db.String(30), nullable=True)
-    phone = db.Column(db.String(30), nullable=True)
+    username = db.Column(db.String(30), nullable=True)
     email = db.Column(db.String(80), unique=True, nullable=False)
     confirmation = db.Column(db.Boolean(), nullable=False, default=False)
     created_at = db.Column(db.DateTime(), nullable=True, default=dt.datetime.utcnow)
@@ -30,10 +28,6 @@ class User(db.Model, UserMixin):
     _password = db.Column(db.Binary(60), nullable=False)
 
     predictions = relationship("UserPredictions", back_populates="user_rel")
-
-    @property
-    def full_name(self):
-        return '{} {}'.format(self.first_name, self.last_name)
 
     @hybrid_property
     def password(self):

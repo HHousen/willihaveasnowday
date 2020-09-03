@@ -10,17 +10,39 @@
             <div class="row center">
                 <img class="circle" src="{{ current_user.avatar(128) }}">
                 <h3>{{ current_user.full_name | title }}</h3>
-                <p>Last Seen On: {{ moment(current_user.last_seen).format('LLL') }}</p>
+                <p>Points: {{ current_user.points }} <a class="modal-trigger" href="#points-info"><i class="material-icons">help_outline</i></a></p>
+                <p>Leaderboard Rank: {{ current_user.rank }} <a class="modal-trigger" href="#rank-info"><i class="material-icons">help_outline</i></a></p>
                 <p>Credits: {{ current_user.credits }}</p>
                 <a href="{{ url_for('userbp.pay') }}" class="waves-effect waves-light btn">Buy More Credits</a>
+                {% if current_user.rank == 1 %}
+                <p>Congrats on being first on the leaderboard! Here's a cute cat gif.</p>
+                <img src="https://cataas.com/cat/gif?type=or" alt="Cute cat gif">
+                {% endif %}
             </div>
+        </div>
+    </div>
+    <div id="rank-info" class="modal">
+        <div class="modal-content">
+            <h4>Leaderboard Info</h4>
+            <p>The ranking shown here on your profile is <strong>updated every three hours</strong> Tuesday through Saturday.</p>
+            <p>The rankings shown on <a href="{{ url_for('mainbp.leaderboard') }}">the leaderboard page</a> are <strong>always up to date</strong>.</p>
+        </div>
+        <div class="modal-footer">
+            <a href="#!" class="modal-close waves-effect waves-red btn-flat">Close</a>
+        </div>
+    </div>
+    <div id="points-info" class="modal">
+        <div class="modal-content">
+            <h4>Points Info</h4>
+            <p>You gain <strong>points</strong> for <strong>each contribution</strong> that you make to Will I Have a Snow Day.com.</p>
+            <p><strong>One point</strong> is gained for <strong>each email</strong> you respond to by clicking the button indicating you had a snow day or the one indicating you had school.</p>
+            <p>You will be <strong>given a point regardless of the button you press</strong> because data for snow days and open days are equally valuable.</p>
+            <p><strong class="red-text">Important Note:</strong> You may be <strong>temporally banned</strong> from gaining points if you respond to a <strong>large number predictions</strong> across a <strong>large geographic area</strong> in a <strong>short period of time</strong>. Additionally, you may be <strong>temporally banned</strong> if the majority of reports for a zip code continuously disagree with your reports. In short, <strong>don't try to game the system</strong>. Thanks!</p>
+        </div>
+        <div class="modal-footer">
+            <a href="#!" class="modal-close waves-effect waves-red btn-flat">Close</a>
         </div>
     </div>
 {% endblock %}
 
 {% block footer %}{% endblock %}
-{% block scripts %}
-{{ super()  }}
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js" integrity="sha256-4iQZ6BVL4qNKlQ27TExEhBN1HFPvAvAMbFavKKosSWQ=" crossorigin="anonymous"></script>
-    {{ moment.include_moment(no_js=True) }}
-{% endblock %}

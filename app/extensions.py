@@ -18,10 +18,6 @@ bcrypt = Bcrypt()
 from flask_login import LoginManager
 login_manager = LoginManager()
 
-# Moment.js - Times & Dates
-from flask_moment import Moment
-moment = Moment()
-
 # Setup rate limiting on prediction API
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address

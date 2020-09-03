@@ -23,9 +23,9 @@ class User(db.Model, UserMixin):
     email = db.Column(db.String(80), unique=True, nullable=False)
     confirmation = db.Column(db.Boolean(), nullable=False, default=False)
     created_at = db.Column(db.DateTime(), nullable=True, default=dt.datetime.utcnow)
-    last_seen = db.Column(db.DateTime(), default=dt.datetime.utcnow)
     credits = db.Column(db.Integer(), nullable=True, default=0)
     points = db.Column(db.Integer(), nullable=True, default=0)
+    rank = db.Column(db.Integer(), nullable=True, default=0)
     customer_id = db.Column(db.String(40), nullable=True)
     _password = db.Column(db.Binary(60), nullable=False)
 

@@ -15,6 +15,9 @@ from app.toolbox import email
 from app.extensions import db, limiter
 from app.decorators import *
 
+from sqlalchemy.orm import aliased
+from sqlalchemy import func
+
 from sendgrid.helpers.mail import To, Substitution, Personalization, From
 
 from app.views import noaa_api
@@ -101,9 +104,16 @@ def send_follow_up_emails():
         sendgrid_only=True
     )
 
+def update_rankings():
+    u1 = aliased(User)
+    subq = db.session.query(func.count(u1.id)).filter(u1.points > User.points).as_scalar()
+    print(subq)
+    User.query.update({"rank": subq + 1}, synchronize_session=False)
+    db.session.commit()
 
 scheduler = BackgroundScheduler()
 scheduler.add_job(func=send_follow_up_emails, trigger="cron", hour=15, minute=57, day_of_week="0-4", jitter=120)
+scheduler.add_job(func=update_rankings, trigger="cron", hour="*/3", day_of_week="1-5", jitter=120)
 scheduler.start()
 
 # Shut down the scheduler when exiting the app
@@ -170,7 +180,9 @@ def check_for_recent_prediction(zip_code, unauth_user):
 @mainbp.route('/predict', methods=['POST'])
 @limiter.limit("4 per minute")
 def predict():
-    if not current_user.is_authenticated:
+    if current_user.is_authenticated:
+        unauth_user = None
+    else:
         unauth_user = UnauthUser.query.filter_by(uuid=session['id']).first()
         if not unauth_user:
             unauth_user = UnauthUser(uuid=session['id'])
@@ -341,10 +353,3 @@ def leaderboard():
     users = User.query.order_by(-User.points).limit(50).all()
     users = [(user.first_name, user.points, user.avatar(50)) for user in users]
     return render_template('leaderboard.html', users=users, title="Leaderboard")
-
-
-@mainbp.before_app_request
-def before_request():
-    if current_user.is_authenticated:
-        current_user.last_seen = dt.datetime.utcnow()
-        db.session.commit()

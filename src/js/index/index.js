@@ -128,20 +128,26 @@ $(document).ready(function () {
                 html: 'The AI engine is taking an abnormally long time. Please wait...'
             });
         }, duration * 1.30);
-        $("#nav-progress-bar").fadeIn(0).animate({
-            "width": "100%"
-        }, duration, "swing", end_func);
+        $("#nav-progress-bar").fadeIn(0)
+        $("#nav-progress-bar").css({"width": "100%", "transition": duration + "ms linear"})
+        if (end_func) {
+            setTimeout(end_func, duration);
+        }
     }
 
     function resetProgressBar() {
         clearInterval(progressBarLongTimeNotificationTimer);
         $("#nav-progress-bar").fadeOut(function () {
-            $("#nav-progress-bar").css("width", "0");
+            $("#nav-progress-bar").css({"width": "0", "transition": "1ms linear"});
         });
     }
 
     function stopAnimateProgressBar() {
-        $("#nav-progress-bar").stop(false, true);
+        $("#nav-progress-bar").css("width", $("#nav-progress-bar").css("width"))
+        setTimeout(function () {
+            $("#nav-progress-bar").css({"width": "100%", "transition": "200ms linear"});
+        }, 1);
+        
         resetProgressBar();
     }
 
@@ -249,20 +255,20 @@ $(document).ready(function () {
             for (let i = 0; i < data.percentages.length; i++) {
                 const element = data.percentages[i];
                 
-                var circleBarChance = $("#day-" + i + "-card .card-content svg path.circle").get(0);
+                var circleBarChance = $("#day-" + i + "-card .card-content svg path.circle");
                 var circleTextChance = $("#day-" + i + "-card .card-content svg text.percentage");
                 var cardTitle = $("#day-" + i + "-card span.card-title span.card-title-inner");
                 var descriptionText = $("#day-" + i + "-percentage-text");
                 
                 if (element == -3) {
-                    circleBarChance.remove();
+                    circleBarChance.hide();
                     circleTextChance.text("?");
                     cardTitle.text(dates[i]);
                     descriptionText.text("Unknown");
                 } else {
-                    circleBarChance.setAttribute('stroke-dasharray',
+                    circleBarChance.show().attr('stroke-dasharray',
                         element + ', 100');
-                        circleTextChance.text(element + "%");
+                    circleTextChance.text(element + "%");
                     cardTitle.text(dates[i]);
                     descriptionText.text(element);
                 }

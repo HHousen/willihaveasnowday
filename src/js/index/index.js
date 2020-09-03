@@ -292,6 +292,7 @@ $(document).ready(function () {
                 }
             }
 
+            window.scrollTo(0, 0);
             $("#results-panel").fadeIn("slow", function () {
                 $("#predict-form-submit-btn").removeClass("disabled");
             });

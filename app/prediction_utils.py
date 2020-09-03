@@ -54,16 +54,3 @@ used_features_list = ['Air Temperature Hour 23',
                       'Present Weather Observation Intensity Hour 20',
                       'Latitude',
                       'Snow Depth Hour 5']
-
-
-def calculate_predication_date_offset():
-    date = datetime.datetime.today()
-    offset = 0
-    weekend = date.weekday() == 5 or date.weekday() == 6
-    if (not weekend) and date.hour >= 12:
-        offset += 1
-    while date.weekday() == 5 or date.weekday() == 6:
-        date = date + datetime.timedelta(1)
-        offset += 1
-
-    return offset, date.date()

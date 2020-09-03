@@ -8,18 +8,14 @@ import numpy as np
 def get_weather(zip_code, country='US', return_result_object=False):
     n = noaa.NOAA(user_agent="Snow Day Predictor <hayden@haydenhousen.com>")
 
-    forecast_response = n.get_forecasts(zip_code, country, return_result_object=return_result_object)
+    forecast_response = n.get_forecasts(zip_code, country, data_type=["grid", None], return_result_object=return_result_object)
     
     if return_result_object:
-        weather_data, result_object = forecast_response
+        (weather_data, text_weather), result_object = forecast_response
     else:
-        weather_data = forecast_response
+        weather_data, text_weather = forecast_response
 
-    text_weather = n.get_forecasts(zip_code, country, data_type=None)
-
-    # with open("delete.json", "w") as file:
-    #     import json
-    #     json.dump(weather_data, file)
+    # text_weather = n.get_forecasts(zip_code, country, data_type=None)
 
     if return_result_object:
         return weather_data, text_weather, result_object
@@ -85,11 +81,13 @@ def generate_hourly(weather_data, name, scaling_factor=None):
 
     for element in weather_data["values"]:
         time, duration = element["validTime"].split("/")
-        # Skip current element if it lasts for more than a day
-        if "D" in duration:
-            continue
-
-        duration = int(duration[2:3])  # select the number of hours in strings like "PT1H"
+        # If current element lasts for more than a day then convert days to hours for `duration`
+        if "D" in duration:  # P5DT6H
+            days = int(duration[1:2])
+            hours = int(duration[4:5])
+            duration = days * 24 + hours
+        else:  # PT4H
+            duration = int(duration[2:3])  # select the number of hours in strings like "PT1H"
         current_datetime = datetime.datetime.fromisoformat(time)
 
         current_date = current_datetime.replace(minute=0, hour=0, second=0, microsecond=0)
@@ -98,21 +96,26 @@ def generate_hourly(weather_data, name, scaling_factor=None):
             for duration_idx in range(duration):
                 if type(name) is dict:
                     for idx, (element_name, item) in enumerate(name.items()):
-                        if duration_idx == 0:
+                        if duration_idx == 0 or duration_idx % 24 == 0:
                             daily_values_lists[idx].append([element["value"][0][element_name]])
                         else:
                             daily_values_lists[idx][-1].append(element["value"][0][element_name])
                 else:
-                    if duration_idx == 0:
+                    if duration_idx == 0 or duration_idx % 24 == 0:
                         daily_values_lists.append([element["value"]])
                     else:
                         daily_values_lists[-1].append(element["value"])
         else:
             for _ in range(duration):
                 if type(name) is dict:
+                    if len(daily_values_lists[0][-1]) == 24:
+                        for idx, _ in enumerate(daily_values_lists):
+                            daily_values_lists[idx].append([])
                     for idx, (element_name, item) in enumerate(name.items()):
                         daily_values_lists[idx][-1].append(element["value"][0][element_name])
                 else:
+                    if len(daily_values_lists[-1]) == 24:
+                        daily_values_lists.append([])
                     daily_values_lists[-1].append(element["value"])
     
     # Apply scaling factor if it is set
@@ -143,6 +146,9 @@ def generate_hourly(weather_data, name, scaling_factor=None):
         for idx, _ in enumerate(name):
             length = max(map(len, daily_values_lists[idx]))
             daily_values_lists[idx] = [xi+[None]*(length-len(xi)) for xi in daily_values_lists[idx]]
+    else:
+        length = max(map(len, daily_values_lists))
+        daily_values_lists = [xi+[None]*(length-len(xi)) for xi in daily_values_lists]
 
     # Swap last two (or only two) axes to convert from a list of days to a list of values
     # where each value is a list of the values for each day.
@@ -171,7 +177,7 @@ def push_date_to_weekday(date):
         date = date + datetime.timedelta(1)
     return date
 
-def create_weekdates():
+def create_weekdates(return_weekday_names=True, return_offsets=False):
     today = datetime.datetime.today()
     if today.hour >= 12:
         today = today + datetime.timedelta(1)
@@ -182,7 +188,18 @@ def create_weekdates():
     third_day = tomorrow + datetime.timedelta(1)
     third_day = push_date_to_weekday(third_day)
 
-    dates = [today.strftime('%A'), tomorrow.strftime('%A'), third_day.strftime('%A')]
+    dates = [today, tomorrow, third_day]
+
+    if return_offsets:
+        today = datetime.datetime.today().replace(hour=0, minute=0, second=0)
+        offsets = [(date - today).days for date in dates]
+
+    if return_weekday_names:
+        dates = [date.strftime('%A') for date in dates]
+
+    if return_offsets:
+        return dates, offsets
+
     return dates
 
 def process_text_descriptions(text_descriptions, days_to_keep=None):
@@ -385,7 +402,7 @@ def prepapre_model_inputs(weather_data, extra_info=None, truncate=True, used_fea
     }
 
     # Fill empty values (most likely will only will SNWD)
-    model_inputs = {key: value if value else [np.nan]*10 for (key, value) in model_inputs.items()}
+    model_inputs = {key: value if len(value) > 0 else [np.nan]*10 for (key, value) in model_inputs.items()}
     
     if extra_info:
         model_inputs = {**model_inputs, **extra_info}
@@ -409,7 +426,7 @@ def prepapre_model_inputs(weather_data, extra_info=None, truncate=True, used_fea
 # sys.path.insert(1, os.path.join(sys.path[0], '..'))
 # from prediction_utils import used_features_list
 
-# weather_data, text_weather, result_object = get_weather("12564", return_result_object=True)
+# weather_data, text_weather, result_object = get_weather("06784", return_result_object=True)
 # extra_info = {"Latitude": result_object.lat, "Longitude": result_object.lng, "State": result_object.state}
 # model_inputs = prepapre_model_inputs(weather_data, extra_info, used_features_list)
 

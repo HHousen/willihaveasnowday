@@ -248,11 +248,24 @@ $(document).ready(function () {
 
             for (let i = 0; i < data.percentages.length; i++) {
                 const element = data.percentages[i];
-                $("#day-" + i + "-card .card-content svg path.circle").get(0).setAttribute('stroke-dasharray',
-                    element + ', 100');
-                $("#day-" + i + "-card .card-content svg text.percentage").text(element + "%");
-                $("#day-" + i + "-card .card-content span.card-title").text(dates[i]);
-                $("#day-" + i + "-percentage-text").text(element);
+                
+                var circleBarChance = $("#day-" + i + "-card .card-content svg path.circle").get(0);
+                var circleTextChance = $("#day-" + i + "-card .card-content svg text.percentage");
+                var cardTitle = $("#day-" + i + "-card span.card-title span.card-title-inner");
+                var descriptionText = $("#day-" + i + "-percentage-text");
+                
+                if (element == -3) {
+                    circleBarChance.remove();
+                    circleTextChance.text("?");
+                    cardTitle.text(dates[i]);
+                    descriptionText.text("Unknown");
+                } else {
+                    circleBarChance.setAttribute('stroke-dasharray',
+                        element + ', 100');
+                        circleTextChance.text(element + "%");
+                    cardTitle.text(dates[i]);
+                    descriptionText.text(element);
+                }
             }
 
             if (data.weather_text == null) {
@@ -262,12 +275,20 @@ $(document).ready(function () {
             } else {
                 for (let i = 0; i < data.weather_text.length; i++) {
                     const element = data.weather_text[i];
+                    
                     new_html = "";
                     element.forEach(function (period, index) {
                         new_html += "<strong>" + period["name"] + "</strong>: ";
                         new_html += truncate(period["detailedForecast"], 100) + "<br>";
                     });
                     $("#day-" + i + "-text").html(new_html);
+
+                    new_html = "";
+                    element.forEach(function (period, index) {
+                        new_html += "<strong>" + period["name"] + "</strong>: ";
+                        new_html += period["detailedForecast"] + "<br>";
+                    });
+                    $("#day-" + i + "-text-all").html(new_html);
                 }
             }
 

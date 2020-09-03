@@ -18,7 +18,7 @@ from app.decorators import *
 from sendgrid.helpers.mail import To, Substitution, Personalization, From
 
 from app.views import noaa_api
-from app.prediction_utils import used_features_list, calculate_predication_date_offset
+from app.prediction_utils import used_features_list
 
 import pandas as pd
 
@@ -28,8 +28,6 @@ import atexit
 import time
 from apscheduler.schedulers.background import BackgroundScheduler
 
-import joblib
-model = joblib.load("/path/to/model.joblib")
 
 # Create the list that holds zip codes that the model is currently processing.
 # This is used so that if two people predict for the same zip code at the same time
@@ -200,7 +198,7 @@ def predict():
         currently_running_zip_codes.append(form.zip_code.data)
 
         try:
-            weather_data, text_weather, result_object = noaa_api.get_weather("12564", return_result_object=True)
+            weather_data, text_weather, result_object = noaa_api.get_weather(form.zip_code.data, return_result_object=True)
         except ValueError as e:
             currently_running_zip_codes.remove(form.zip_code.data)
             return json.dumps({"zip_code": ["Invalid zip code"]}), 400
@@ -208,20 +206,26 @@ def predict():
         # Prepare model inputs
         extra_info = {"Latitude": result_object.lat, "Longitude": result_object.lng, "State": result_object.state}
         model_inputs = noaa_api.prepapre_model_inputs(weather_data, extra_info, used_features_list=used_features_list)
-        offset, first_prediction_date = calculate_predication_date_offset()
 
-        if offset > 2:
-            currently_running_zip_codes.remove(form.zip_code.data)
-            raise PredictionError("Code 641")
+        dates, offsets = noaa_api.create_weekdates(return_weekday_names=False, return_offsets=True)
+        first_prediction_date = dates[0]
 
         # Make prediction
         try:
             model_inputs["Number of Snowdays in Year"] = [form.num_snowdays.data] * len(model_inputs[used_features_list[0]])
             # Convert to DataFrame and reorder the columns according to used_features_list
             model_inputs = pd.DataFrame(model_inputs)[used_features_list]
-            prediction_probs = model.predict_proba(model_inputs)
+            prediction_probs = app.model.predict_proba(model_inputs)
+            prediction_probs = prediction_probs[:, 0]
 
-            prediction = {"percentages": [int(prediction_probs[0+offset][0]*100), int(prediction_probs[1+offset][0]*100), int(prediction_probs[2+offset][0]*100)]}
+            prediction = {"percentages": []}
+
+            for idx, offset in enumerate(offsets):
+                try:
+                    prediction["percentages"].append(int(prediction_probs[offset]*100))
+                except IndexError:
+                    prediction["percentages"].append(-3)  # -3 is code for "no prediction returned"
+
         except Exception as e:
             currently_running_zip_codes.remove(form.zip_code.data)
             raise PredictionError("Code 436") from e

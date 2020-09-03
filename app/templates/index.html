@@ -128,6 +128,10 @@
 			transform: rotate(0deg);
 		}
 	}
+	
+	.day-text {
+		text-align: left;
+	}
 </style>
 {% endblock %}
 
@@ -214,55 +218,67 @@
 					<div class="row">
 						<div class="col s12 m6 l4">
 							<div id="day-0-card" class="card orange darken-4">
-								<div class="card-content white-text">
-									<svg viewBox="0 0 36 36" class="circular-chart cc-red" style="width: 70%;">
-										<path class="circle-bg" d="M18 2.0845
+								<div class="card-content activator white-text">
+									<svg viewBox="0 0 36 36" class="circular-chart cc-red activator" style="width: 70%;">
+										<path class="circle-bg activator" d="M18 2.0845
 											a 15.9155 15.9155 0 0 1 0 31.831
 											a 15.9155 15.9155 0 0 1 0 -31.831" />
-										<path class="circle" stroke-dasharray="0, 100" d="M18 2.0845
+										<path class="circle activator" stroke-dasharray="0, 100" d="M18 2.0845
 											a 15.9155 15.9155 0 0 1 0 31.831
 											a 15.9155 15.9155 0 0 1 0 -31.831" />
-										<text x="18" y="20.35" class="percentage">Loading</text>
+										<text x="18" y="20.35" class="percentage activator">Loading</text>
 									</svg>
-									<span class="card-title">Loading...</span>
-									<p><strong id="day-0-percentage-text">Loading</strong>% chance of a snow day.</p>
-									<p id="day-0-text">Loading...</p>
+									<span class="card-title activator"><span class="card-title-inner">Loading...</span></span>
+									<p><strong id="day-0-percentage-text" class="activator">Loading</strong>% chance of a snow day.</p>
+									<p class="day-text activator" id="day-0-text">Loading...</p>
+								</div>
+								<div class="card-reveal deep-orange darken-4 white-text">
+									<span class="card-title"><span class="card-title-inner">Loading...</span><i class="material-icons right">close</i></span>
+									<p class="day-text" id="day-0-text-all">Loading...</p>
 								</div>
 							</div>
 						</div>
 						<div class="col s12 m6 l4">
 							<div id="day-1-card" class="card orange darken-3">
-								<div class="card-content white-text">
-									<svg viewBox="0 0 36 36" class="circular-chart cc-red" style="width: 70%;">
-										<path class="circle-bg" d="M18 2.0845
+								<div class="card-content activator white-text">
+									<svg viewBox="0 0 36 36" class="circular-chart cc-red activator" style="width: 70%;">
+										<path class="circle-bg activator" d="M18 2.0845
 											a 15.9155 15.9155 0 0 1 0 31.831
 											a 15.9155 15.9155 0 0 1 0 -31.831" />
-										<path class="circle" stroke-dasharray="0, 100" d="M18 2.0845
+										<path class="circle activator" stroke-dasharray="0, 100" d="M18 2.0845
 											a 15.9155 15.9155 0 0 1 0 31.831
 											a 15.9155 15.9155 0 0 1 0 -31.831" />
-										<text x="18" y="20.35" class="percentage">Loading</text>
+										<text x="18" y="20.35" class="percentage activator">Loading</text>
 									</svg>
-									<span class="card-title">Loading...</span>
-									<p><strong id="day-1-percentage-text">Loading</strong>% chance of a snow day.</p>
-									<p id="day-1-text">Loading...</p>
+									<span class="card-title activator"><span class="card-title-inner">Loading...</span></span>
+									<p><strong id="day-1-percentage-text" class="activator">Loading</strong>% chance of a snow day.</p>
+									<p class="day-text activator" id="day-1-text">Loading...</p>
+								</div>
+								<div class="card-reveal deep-orange darken-3 white-text">
+									<span class="card-title"><span class="card-title-inner">Loading...</span><i class="material-icons right">close</i></span>
+									<p class="day-text" id="day-1-text-all">Loading...</p>
 								</div>
 							</div>
 						</div>
 						<div class="col s12 m6 l4">
 							<div id="day-2-card" class="card orange darken-2">
-								<div class="card-content white-text">
-									<svg viewBox="0 0 36 36" class="circular-chart cc-red" style="width: 70%;">
-										<path class="circle-bg" d="M18 2.0845
+								<div class="card-content activator white-text">
+									<svg viewBox="0 0 36 36" class="circular-chart cc-red activator" style="width: 70%;">
+										<path class="circle-bg activator" d="M18 2.0845
 											a 15.9155 15.9155 0 0 1 0 31.831
 											a 15.9155 15.9155 0 0 1 0 -31.831" />
-										<path class="circle" stroke-dasharray="0, 100" d="M18 2.0845
+										<path class="circle activator" stroke-dasharray="0, 100" d="M18 2.0845
 											a 15.9155 15.9155 0 0 1 0 31.831
 											a 15.9155 15.9155 0 0 1 0 -31.831" />
-										<text x="18" y="20.35" class="percentage">Loading</text>
+										<text x="18" y="20.35" class="percentage activator">Loading</text>
 									</svg>
-									<span class="card-title">Loading...</span>
-									<p><strong id="day-2-percentage-text">Loading</strong>% chance of a snow day.</p>
-									<p id="day-2-text">Loading...</p>
+									<span class="card-title activator"><span class="card-title-inner">Loading...</span></span>
+									<p><strong id="day-2-percentage-text" class="activator">Loading</strong>% chance of a snow day.</p>
+									<p class="day-text activator" id="day-2-text">Loading...</p>
+								</div>
+								<div class="card-reveal deep-orange darken-2 white-text">
+									<span class="card-title"><span class="card-title-inner">Loading...</span><i class="material-icons right">close</i></span>
+									<p class="day-text" id="day-2-text-all">Loading...</p>
 								</div>
 							</div>
 						</div>

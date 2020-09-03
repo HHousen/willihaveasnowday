@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, current_app
 from app import commands, admin
 from app.views import user, main
 from app.models import User
@@ -6,6 +6,7 @@ from app.extensions import bcrypt, db, toolbar, login_manager, mail, moment, lim
 from app.logger_setup import logger_setup
 from app.custom_errors import PredictionError
 import json
+import joblib
 import os.path as op
 
 import sentry_sdk
@@ -14,9 +15,16 @@ from sentry_sdk import last_event_id
 from sentry_sdk.integrations.flask import FlaskIntegration
 from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
 
-def create_app(config_object='app.settings'):
+def create_app(config_object='app.settings'):    
     app = Flask(__name__.split('.')[0])
     app.config.from_object(config_object)
+    
+    # Load model when we have access to the `app` variable and can create
+    # an application context. We can load this in a view with `app.model`.
+    with app.app_context():
+        global model
+        model = joblib.load(current_app.config['MODEL_PATH'])
+
     setup_sentry()
     register_extensions(app)
     register_blueprints(app)

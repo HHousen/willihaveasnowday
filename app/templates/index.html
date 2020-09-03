@@ -28,27 +28,26 @@
 <style>
 	body {
 		height: 100vh;
-		/* overflow: auto; */
 		position: relative;
 		min-height: 700px;
 	}
 
-	body:before {
-		content: "";
+	#background-container {
 		position: fixed;
-		top: -5%;
-		left: -5%;
-		right: 0;
 		z-index: -1;
-		/* 'https://source.unsplash.com/1920x1080/?nature,snow' */
-		display: block;
-		background: #222;
+		transform: scale(1.1);
+		width: 100%;
+		height: 100%;
+	}
+
+	#background {
+		position: fixed;
+		z-index: -1;
 		background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
 		url({{ background }});
 		background-size: cover;
-		width: 110%;
-		height: 110%;
-
+		width: 100%;
+		height: 100%;
 		filter: blur(10px);
 	}
 
@@ -136,6 +135,9 @@
 {% endblock %}
 
 {% block content %}
+<div id="background-container">
+	<div id="background"></div>
+</div>
 <div id="prediction-wrapper" class="valign-wrapper-med-up">
 	<div class="container">
 		<div id="predict-panel">
@@ -195,7 +197,8 @@
 			</div>
 		</div>
 
-		<div id="results-panel" class="row center valign-wrapper-med-up" style="display: none;">
+		<div id="results-panel" class="row center" style="display: none;">
+			<div class="valign-wrapper-med-up" style="margin-top: 20px;">
 			<div class="row center">
 				<div class="row">
 					<a id="go-back-btn" class="waves-effect btn-flat waves-light left"
@@ -284,6 +287,10 @@
 						</div>
 					</div>
 				</div>
+			</div>
+			</div>
+			<div class="row center">
+				<img src="https://via.placeholder.com/728x90">
 			</div>
 		</div>
 	</div>

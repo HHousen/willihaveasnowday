@@ -53,3 +53,11 @@ footer.page-footer {
     align-items: center;
   }
 }
+
+@media only screen and (min-width: 601px) and (max-width: 736px) {
+  nav .brand-logo {
+    left: 0;
+    position: inherit !important;
+    transform: translateX(0%) !important;
+  }
+}

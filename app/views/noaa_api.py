@@ -167,7 +167,8 @@ def generate_text_descriptions(text_weather):
         final_dict[forecast_period["name"]] = {
             "name": forecast_period["name"],
             "shortForecast": forecast_period["shortForecast"],
-            "detailedForecast": forecast_period["detailedForecast"]
+            "detailedForecast": forecast_period["detailedForecast"],
+            "startTime": forecast_period["startTime"]
         }
 
     return final_dict
@@ -177,8 +178,14 @@ def push_date_to_weekday(date):
         date = date + datetime.timedelta(1)
     return date
 
-def create_weekdates(return_weekday_names=True, return_offsets=False):
-    today = datetime.datetime.today()
+def create_weekdates(return_weekday_names=True, utc=False, return_offsets=False):
+    if utc:
+        today = datetime.datetime.now(datetime.timezone.utc)
+    else:
+        today = datetime.datetime.today()
+    
+    today = today.replace(hour=0, minute=0, second=0, microsecond=0)
+    
     if today.hour >= 12:
         today = today + datetime.timedelta(1)
 
@@ -191,7 +198,7 @@ def create_weekdates(return_weekday_names=True, return_offsets=False):
     dates = [today, tomorrow, third_day]
 
     if return_offsets:
-        today = datetime.datetime.today().replace(hour=0, minute=0, second=0)
+        today = datetime.datetime.today().replace(hour=0, minute=0, second=0, microsecond=0)
         offsets = [(date - today).days for date in dates]
 
     if return_weekday_names:
@@ -204,38 +211,34 @@ def create_weekdates(return_weekday_names=True, return_offsets=False):
 
 def process_text_descriptions(text_descriptions, days_to_keep=None):
     if days_to_keep is None:
-        days_to_keep = create_weekdates()
+        days_to_keep = create_weekdates(return_weekday_names=False, utc=True)
 
-    check_if_contains_weekday = datetime.datetime.today().strftime('%A') == days_to_keep[0]
+    text_descriptions = list(text_descriptions.items())
 
-    weekdays = [datetime.date(2001, 1, i).strftime('%A').lower() for i in range(1, 8)]
-    
-    # keys_to_remove = []
     final_list = []
-    index = -1
-    prev_period_name = "aaaa"
-    for period_name, data in text_descriptions.items():
-        contains_weekday = any([weekday in period_name.lower() for weekday in weekdays])
-        period_name_in_any_days_to_keep = any([day.lower() in period_name.lower() for day in days_to_keep])
-        
-        if check_if_contains_weekday:
-            remove_period = contains_weekday and not period_name_in_any_days_to_keep
-        else:
-            remove_period = not period_name_in_any_days_to_keep
-
-        if remove_period:
-            # keys_to_remove.append(period_name)
-            continue
-        elif contains_weekday and period_name[:4] != prev_period_name[:4]:
-            index += 1
-            prev_period_name = period_name
-        
-        try:
-            final_list[index].append(data)
-        except IndexError:
-            final_list.append([data])
-
-    # [text_descriptions.pop(k, None) for k in keys_to_remove]
+    index = 0
+    offset = 0
+    for day in days_to_keep:
+        text_descriptions = text_descriptions[offset:]
+        offset = 0
+        for idx, (period_name, data) in enumerate(text_descriptions):
+            period_date = datetime.datetime.fromisoformat(data["startTime"])
+            time_distance = (period_date - day).days
+            
+            if time_distance == 0:
+                del data["startTime"]
+                
+                try:
+                    final_list[index].append(data)
+                except IndexError:
+                    final_list.append([data])
+                
+                offset = idx + 1
+            
+            elif time_distance > 0:
+                index += 1
+                break
+    
     return final_list
 
 def translate_hourly_observation_data(hourly_observation_data):
@@ -426,7 +429,11 @@ def prepapre_model_inputs(weather_data, extra_info=None, truncate=True, used_fea
 # sys.path.insert(1, os.path.join(sys.path[0], '..'))
 # from prediction_utils import used_features_list
 
-# weather_data, text_weather, result_object = get_weather("06784", return_result_object=True)
+# weather_data, text_weather, result_object = get_weather("12564", return_result_object=True)
+
+# period_text_descriptions = generate_text_descriptions(text_weather)
+# period_text_descriptions = process_text_descriptions(period_text_descriptions)
+
 # extra_info = {"Latitude": result_object.lat, "Longitude": result_object.lng, "State": result_object.state}
 # model_inputs = prepapre_model_inputs(weather_data, extra_info, used_features_list)
 

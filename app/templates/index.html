@@ -23,8 +23,6 @@
 <meta property="twitter:description"
 	content="The most powerful snow day predictor. With just your zip code, our advanced AI algorithm will calculate your chance of having a snow day.">
 <meta property="twitter:image" content="{{ url_for('static', filename='img/social.webp') }}">
-<script data-ad-client="ca-pub-5688177144759966" async
-	src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
 <style>
 	body {
 		height: 100vh;
@@ -139,6 +137,30 @@
 	.card {
 		transition: opacity 1.5s;
 	}
+
+	.main-ads { 
+		width: 300px;
+		height: 300px;
+		margin: auto;
+	}
+	@media(min-width: 601px) {
+		.main-ads {
+			width: 520px;
+			height: 200px;
+		}
+	}
+	@media(min-width: 993px) {
+		.main-ads {
+			width: 468px;
+			height: 200px;
+		}
+	}
+	@media(min-width: 1201px) {
+		.main-ads {
+			width: 728px;
+			height: 90px;
+		}
+	}
 </style>
 {% endblock %}
 
@@ -198,8 +220,15 @@
 							</div>
 						</form>
 					</div>
-					<div class="row center">
-						<img src="https://via.placeholder.com/728x90">
+					<div class="row">
+						<!-- WilliHaveASnowday Main Page -->
+						<ins class="adsbygoogle main-ads"
+							style="display:block;"
+							data-ad-client="ca-pub-5688177144759966"
+							data-ad-slot="3118611684"></ins>
+						<script>
+							(adsbygoogle = window.adsbygoogle || []).push({});
+						</script>
 					</div>
 				</div>
 			</div>
@@ -300,8 +329,15 @@
 				</div>
 			</div>
 			</div>
-			<div class="row center">
-				<img src="https://via.placeholder.com/728x90">
+			<div class="row">
+				<!-- WilliHaveASnowday Main Page 2 -->
+				<ins class="adsbygoogle main-ads"
+					style="display:block"
+					data-ad-client="ca-pub-5688177144759966"
+					data-ad-slot="5002714008"></ins>
+				<script>
+					(adsbygoogle = window.adsbygoogle || []).push({});
+				</script>
 			</div>
 		</div>
 	</div>
@@ -355,4 +391,5 @@
 
 {% block final %}
 <script async src="{{ url_for('static', filename='js/index.js') }}"></script>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
 {% endblock %}

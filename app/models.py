@@ -78,7 +78,7 @@ class PreditionReport(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     created_at = db.Column(db.DateTime(), unique=True, nullable=False, default=dt.datetime.now)
-    zip_code = db.Column(db.Integer(), nullable=False)
+    zip_code = db.Column(db.String(5), nullable=False)
     num_snowdays = db.Column(db.Integer(), nullable=False)
     weather_info = db.Column(db.String(100), nullable=False)
     model_prediction = db.Column(db.String(30), nullable=False)

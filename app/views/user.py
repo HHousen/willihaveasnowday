@@ -136,7 +136,7 @@ def forgot():
             email.send(user.email, subject, html, from_email=current_app.config['REGISTER_FROM_EMAIL'])
             # Send back to the home page
             flash('Check your emails to reset your password', 'positive')
-            return redirect(url_for('index'))
+            return redirect(url_for('mainbp.index'))
         else:
             flash('Unknown email address', 'negative')
             return redirect(url_for('userbp.forgot'))

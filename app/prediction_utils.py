@@ -1,5 +1,3 @@
-import datetime
-
 used_features_list = ['Air Temperature Hour 23',
                       'Air Temperature Hour 14',
                       'Air Temperature Hour 13',

@@ -255,16 +255,21 @@ $(document).ready(function () {
             for (let i = 0; i < data.percentages.length; i++) {
                 const element = data.percentages[i];
                 
+                $("#day-" + i + "-card").css("opacity", "1");
+
                 var circleBarChance = $("#day-" + i + "-card .card-content svg path.circle");
                 var circleTextChance = $("#day-" + i + "-card .card-content svg text.percentage");
                 var cardTitle = $("#day-" + i + "-card span.card-title span.card-title-inner");
                 var descriptionText = $("#day-" + i + "-percentage-text");
                 
                 if (element == -3) {
+                    var moreInfoText = $("#day-" + i + "-more-info-text");
+
                     circleBarChance.hide();
                     circleTextChance.text("?");
                     cardTitle.text(dates[i]);
                     descriptionText.text("Unknown");
+                    moreInfoText.text("We cannot make predictions this far in advance due to a lack of accurate forecast data.");
                 } else {
                     circleBarChance.show().attr('stroke-dasharray',
                         element + ', 100');
@@ -277,6 +282,7 @@ $(document).ready(function () {
             if (data.weather_text == null) {
                 for (let i = 0; i < 3; i++) {
                     $("#day-" + i + "-text").html("");
+                    $("#day-" + i + "-text-all").html("");
                 }
             } else {
                 for (let i = 0; i < data.weather_text.length; i++) {
@@ -301,6 +307,13 @@ $(document).ready(function () {
             window.scrollTo(0, 0);
             $("#results-panel").fadeIn("slow", function () {
                 $("#predict-form-submit-btn").removeClass("disabled");
+                for (let i = 0; i < data.percentages.length; i++) {
+                    const element = data.percentages[i];
+                    
+                    if (element == -3) {
+                        $("#day-" + i + "-card").css("opacity", "0.5");
+                    }
+                }
             });
         });
     }

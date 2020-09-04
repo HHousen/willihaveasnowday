@@ -172,7 +172,7 @@ def check_for_recent_prediction(zip_code, unauth_user):
                 db.session.commit()
         model_prediction = json.loads(last_prediction.model_prediction)
         weather_text = json.loads(last_prediction.weather_text)
-        return json.dumps({**model_prediction, "weather_text": weather_text})
+        return json.dumps({"percentages": model_prediction, "weather_text": weather_text})
     
     return False
 
@@ -199,9 +199,9 @@ def predict():
                     return recent_prediction
             raise PredictionError("Code 878")
         
-        # today = dt.datetime.now()
-        # if today.month in (7, 8):
-        #     return json.dumps({"percentages": [0, 0, 0], "weather_text": "summer"})
+        today = dt.datetime.now()
+        if today.month in (7, 8):
+            return json.dumps({"percentages": [0, 0, 0], "weather_text": "summer"})
 
         recent_prediction = check_for_recent_prediction(form.zip_code.data, unauth_user)
         if recent_prediction:
@@ -249,7 +249,7 @@ def predict():
             zip_code=form.zip_code.data,
             num_snowdays=form.num_snowdays.data,
             weather_info=0,
-            model_prediction=json.dumps(prediction),
+            model_prediction=json.dumps(prediction["percentages"]),
             weather_text=json.dumps(period_text_descriptions),
             first_prediction_date=first_prediction_date,
         )

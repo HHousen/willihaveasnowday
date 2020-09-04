@@ -85,7 +85,8 @@
 	}
 
 	.circular-chart {
-		max-width: 240px;
+		width: 70%;
+		max-width: 210px;
 	}
 
 	.percentage {
@@ -130,6 +131,13 @@
 	
 	.day-text {
 		text-align: left;
+	}
+
+	.card .card-content {
+		cursor: pointer;
+	}
+	.card {
+		transition: opacity 1.5s;
 	}
 </style>
 {% endblock %}
@@ -219,10 +227,10 @@
 				<div class="row">
 
 					<div class="row">
-						<div class="col s12 m6 l4">
+						<div class="col s12 m12 l4">
 							<div id="day-0-card" class="card orange darken-4">
 								<div class="card-content activator white-text">
-									<svg viewBox="0 0 36 36" class="circular-chart cc-red activator" style="width: 70%;">
+									<svg viewBox="0 0 36 36" class="circular-chart cc-red activator">
 										<path class="circle-bg activator" d="M18 2.0845
 											a 15.9155 15.9155 0 0 1 0 31.831
 											a 15.9155 15.9155 0 0 1 0 -31.831" />
@@ -238,13 +246,14 @@
 								<div class="card-reveal deep-orange darken-4 white-text">
 									<span class="card-title"><span class="card-title-inner">Loading...</span><i class="material-icons right">close</i></span>
 									<p class="day-text" id="day-0-text-all">Loading...</p>
+									<p class="left-align" id="day-0-more-info-text"></p>
 								</div>
 							</div>
 						</div>
 						<div class="col s12 m6 l4">
 							<div id="day-1-card" class="card orange darken-3">
 								<div class="card-content activator white-text">
-									<svg viewBox="0 0 36 36" class="circular-chart cc-red activator" style="width: 70%;">
+									<svg viewBox="0 0 36 36" class="circular-chart cc-red activator">
 										<path class="circle-bg activator" d="M18 2.0845
 											a 15.9155 15.9155 0 0 1 0 31.831
 											a 15.9155 15.9155 0 0 1 0 -31.831" />
@@ -260,13 +269,14 @@
 								<div class="card-reveal deep-orange darken-3 white-text">
 									<span class="card-title"><span class="card-title-inner">Loading...</span><i class="material-icons right">close</i></span>
 									<p class="day-text" id="day-1-text-all">Loading...</p>
+									<p class="left-align" id="day-1-more-info-text"></p>
 								</div>
 							</div>
 						</div>
 						<div class="col s12 m6 l4">
 							<div id="day-2-card" class="card orange darken-2">
 								<div class="card-content activator white-text">
-									<svg viewBox="0 0 36 36" class="circular-chart cc-red activator" style="width: 70%;">
+									<svg viewBox="0 0 36 36" class="circular-chart cc-red activator">
 										<path class="circle-bg activator" d="M18 2.0845
 											a 15.9155 15.9155 0 0 1 0 31.831
 											a 15.9155 15.9155 0 0 1 0 -31.831" />
@@ -282,6 +292,7 @@
 								<div class="card-reveal deep-orange darken-2 white-text">
 									<span class="card-title"><span class="card-title-inner">Loading...</span><i class="material-icons right">close</i></span>
 									<p class="day-text" id="day-2-text-all">Loading...</p>
+									<p class="left-align" id="day-2-more-info-text"></p>
 								</div>
 							</div>
 						</div>

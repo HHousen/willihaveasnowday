@@ -89,7 +89,7 @@ def signin():
         if user is not None:
             # Check the password is correct
             if user.check_password(form.password.data):
-                login_user(user)
+                login_user(user, remember=form.remember.data)
                 # Send back to the home page
                 flash('Succesfully signed in', 'positive')
                 return redirect(url_for('mainbp.index'))

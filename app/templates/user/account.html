@@ -8,6 +8,7 @@
                 <h3>{{ current_user.username }}</h3>
                 <p>Points: {{ current_user.points }} <a class="modal-trigger" href="#points-info"><i class="material-icons">help_outline</i></a></p>
                 <p>Leaderboard Rank: {{ current_user.rank }} <a class="modal-trigger" href="#rank-info"><i class="material-icons">help_outline</i></a></p>
+                <p>Account created on {{ current_user.created_at.strftime("%b %d %Y") }}</p>
                 {% if current_user.rank == 1 %}
                 <p>Congrats on being first on the leaderboard! Here's a cute cat gif.</p>
                 <img src="https://cataas.com/cat/gif?type=or" alt="Cute cat gif">

@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import TextField, PasswordField, IntegerField
+from wtforms import TextField, PasswordField, IntegerField, BooleanField
 from wtforms.validators import Required, Length, Email, ValidationError, EqualTo, NumberRange, Optional
 from app.models import User
 
@@ -53,6 +53,7 @@ class Login(FlaskForm):
                       description='Email address')
     password = PasswordField(validators=[Required()],
                              description='Password')
+    remember = BooleanField(description='Remember me?')
 
 
 class SignUp(FlaskForm):

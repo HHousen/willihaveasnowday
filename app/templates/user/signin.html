@@ -16,10 +16,17 @@
 				<div class='input-field col s12'>
 					{{ m.render_field(form.password) }}
 				</div>
-
-				<label style='float: right;'>
-					<a class='red-text text-darken-1' href='/user/forgot'><b>Forgot Password?</b></a>
-				</label>
+			</div>
+			<div class='row'>
+				<div class='col s12'>
+					<label style='float: left;'>
+						{{ form.remember(name_=form.remember.name, id=form.remember.name) }}
+						<span>{{ form.remember.description|title }}</span>
+					</label>
+					<label style='float: right;'>
+						<a class='red-text text-darken-1' href='/user/forgot'><b>Forgot Password?</b></a>
+					</label>
+				</div>
 			</div>
 
 			<br/>

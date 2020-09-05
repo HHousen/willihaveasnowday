@@ -28,7 +28,7 @@ function removeErrors() {
     })
 }
 
-function sendAjaxRequest(form_url, form_data, modal, error_text, successTimeoutFunc) {
+function sendAjaxRequest(form_url, form_data, modal, error_text, successTimeoutFunc, message_429) {
     $.ajax({
         type: "POST",
         url: form_url,
@@ -46,6 +46,10 @@ function sendAjaxRequest(form_url, form_data, modal, error_text, successTimeoutF
             if (request.status == "400") {
                 error_dict = JSON.parse(request.responseText);
                 processAjaxErrors(error_dict);
+            } else if (request.status == "429") {
+                M.toast({
+                    html: message_429
+                });
             } else {
                 removeErrors();
                 M.toast({
@@ -71,7 +75,7 @@ $("#change-password-form").submit(function (e) {
         window.location.replace("/user/signin");
     }
 
-    sendAjaxRequest(form_url, form_data, "#change-password", "Error Changing Password: ", successTimeoutFunc)
+    sendAjaxRequest(form_url, form_data, "#change-password", "Error Changing Password: ", successTimeoutFunc, "You can only change your password once per minute")
 });
 
 $("#change-username-form").submit(function (e) {
@@ -89,5 +93,5 @@ $("#change-username-form").submit(function (e) {
         window.location.reload(true);
     }
 
-    sendAjaxRequest(form_url, form_data, "#change-username", "Error Changing Username: ", successTimeoutFunc)
+    sendAjaxRequest(form_url, form_data, "#change-username", "Error Changing Username: ", successTimeoutFunc, "You can only change your username once every hour")
 });

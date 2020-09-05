@@ -2,6 +2,8 @@ from flask import (Blueprint, render_template, redirect, url_for,
                    abort, flash, request, current_app)
 from flask_login import login_user, logout_user, login_required, current_user
 from itsdangerous import URLSafeTimedSerializer
+import json
+import uuid
 from app import models, app
 from app.extensions import db, login_manager
 from app.forms import user as user_forms
@@ -21,8 +23,8 @@ stripe_keys = {
 stripe.api_key = stripe_keys['secret_key']
 
 @login_manager.user_loader
-def load_user(email):
-    return models.User.query.filter(models.User.email == email).first()
+def load_user(user_id):
+    return models.User.query.filter(models.User.alt_id == user_id).first()
 
 # Create a user blueprint
 userbp = Blueprint('userbp', __name__, url_prefix='/user')
@@ -112,7 +114,41 @@ def signout():
 @userbp.route('/account')
 @login_required
 def account():
-    return render_template('user/account.html', title='Account')
+    change_password_form = user_forms.ChangePassword()
+    change_username_form = user_forms.ChangeUsername()
+    return render_template('user/account.html', change_password_form=change_password_form, change_username_form=change_username_form, title='Account')
+
+
+@userbp.route('/change-password', methods=['POST'])
+@login_required
+def change_password():
+    form = user_forms.ChangePassword()
+    
+    if form.validate_on_submit():
+        if current_user.check_password(form.current_password.data):
+            current_user.password = form.new_password.data
+            current_user.alt_id = str(uuid.uuid4())
+            db.session.commit()
+            logout_user()
+
+            return json.dumps('Your password has been changed, you can sign in'), 200
+        else:
+            return json.dumps('The current password you have entered is wrong'), 401
+
+    return json.dumps(form.errors), 400
+
+
+@userbp.route('/change-username', methods=['POST'])
+@login_required
+def change_username():
+    form = user_forms.ChangeUsername()
+    
+    if form.validate_on_submit():
+        current_user.username = form.new_username.data
+        db.session.commit()
+        return json.dumps('Your username has been changed'), 200
+
+    return json.dumps(form.errors), 400
 
 
 @userbp.route('/forgot', methods=['GET', 'POST'])

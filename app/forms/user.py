@@ -60,16 +60,17 @@ class SignUp(FlaskForm):
 
     ''' User sign up form. '''
 
-    username = TextField(validators=[Required(), Length(min=2, max=30)],
+    username = TextField(validators=[Required(), Length(min=2, max=30),
+                        Unique(User, User.username, "This username is taken")],
                      description='Username')
     email = TextField(validators=[Required(), Email(),
                                   Unique(User, User.email,
                                          'This email address is ' +
-                                         'already linked to an account.')],
+                                         'already linked to an account')],
                       description='Email address')
     password = PasswordField(validators=[
         Required(), Length(min=6),
-        EqualTo('confirm', message='Passwords must match.')
+        EqualTo('confirm', message='Passwords must match')
     ], description='Password')
     confirm = PasswordField(description='Confirm password')
 
@@ -79,3 +80,23 @@ class Credits(FlaskForm):
 
 class Plan(FlaskForm):
     plan = TextField(validators=[Required()])
+
+class ChangePassword(FlaskForm):
+
+    ''' User change password form. '''
+
+    current_password = PasswordField(validators=[Required()],
+                             description='Current password')
+    new_password = PasswordField(validators=[
+        Required(), Length(min=6),
+        EqualTo('confirm', message='Passwords must match')
+    ], description='New password')
+    confirm = PasswordField(description='Confirm password')
+
+class ChangeUsername(FlaskForm):
+
+    ''' User change username form. '''
+
+    new_username = TextField(validators=[Required(), Length(min=2, max=30),
+                                        Unique(User, User.username, "This username is taken")],
+                             description='New username')

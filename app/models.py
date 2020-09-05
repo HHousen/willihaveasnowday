@@ -1,4 +1,5 @@
 import datetime
+import uuid
 from sqlalchemy import ForeignKey, Table
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.ext.associationproxy import association_proxy
@@ -9,6 +10,8 @@ from app.extensions import db, bcrypt
 import datetime as dt
 from hashlib import md5
 
+def uuid_str():
+    return str(uuid.uuid4())
 
 class User(db.Model, UserMixin):
 
@@ -17,7 +20,8 @@ class User(db.Model, UserMixin):
     __tablename__ = 'users'
 
     id = db.Column(db.Integer, primary_key=True, unique=True, nullable=False)
-    username = db.Column(db.String(30), nullable=True)
+    alt_id = db.Column(db.String(32), unique=True, nullable=False, default=uuid_str)
+    username = db.Column(db.String(30), unique=True, nullable=False)
     email = db.Column(db.String(80), unique=True, nullable=False)
     confirmation = db.Column(db.Boolean(), nullable=False, default=False)
     created_at = db.Column(db.DateTime(), nullable=True, default=dt.datetime.utcnow)
@@ -41,7 +45,7 @@ class User(db.Model, UserMixin):
         return bcrypt.check_password_hash(self.password, plaintext)
 
     def get_id(self):
-        return self.email
+        return self.alt_id
 
     def get_credits(self):
         return self.credits

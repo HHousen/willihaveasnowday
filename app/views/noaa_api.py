@@ -1,5 +1,6 @@
 import statistics
 import datetime
+import re
 from collections import OrderedDict
 from noaa_sdk import noaa
 import pandas as pd
@@ -82,12 +83,17 @@ def generate_hourly(weather_data, name, scaling_factor=None):
     for element in weather_data["values"]:
         time, duration = element["validTime"].split("/")
         # If current element lasts for more than a day then convert days to hours for `duration`
-        if "D" in duration:  # P5DT6H
-            days = int(duration[1:2])
-            hours = int(duration[4:5])
+        days_search = re.search(r'P(.*?)D', duration)
+        if days_search:  # P5DT6H
+            days = int(days_search.group(1))
+            hours_search = re.search(r'T(.*?)H', duration)
+            if hours_search:
+                hours = int(hours_search.group(1))
+            else:
+                hours = 0
             duration = days * 24 + hours
         else:  # PT4H
-            duration = int(duration[2:3])  # select the number of hours in strings like "PT1H"
+            duration = int(re.search(r'T(.*?)H', duration).group(1))  # select the number of hours in strings like "PT1H"
         current_datetime = datetime.datetime.fromisoformat(time)
 
         current_date = current_datetime.replace(minute=0, hour=0, second=0, microsecond=0)

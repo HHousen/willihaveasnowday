@@ -5,8 +5,9 @@ $(document).ready(function () {
     var last_zip_code;
     var zip_code;
     var geolocated_zip_code;
-    var progressBarLongTimeNotificationTimer;
+    var progressBarLongTimeNotificationTimers = [];
     var no_geolocation = false;
+    var lastRequest;
 
     $("#predict-form-submit-btn").removeClass("disabled");
 
@@ -123,11 +124,27 @@ $(document).ready(function () {
     }
 
     function animateProgressBar(duration, end_func = false) {
-        progressBarLongTimeNotificationTimer = setTimeout(function () {
+        progressBarLongTimeNotificationTimers.push(setTimeout(function () {
             M.toast({
                 html: 'The AI engine is taking an abnormally long time. Please wait...'
             });
-        }, duration * 1.30);
+        }, duration * 1.30));
+        progressBarLongTimeNotificationTimers.push(setTimeout(function () {
+            M.toast({
+                html: 'Diagnosing potential problem...'
+            });
+        }, duration * 2));
+        progressBarLongTimeNotificationTimers.push(setTimeout(function () {
+            M.toast({
+                html: 'Giving up in 5 seconds...'
+            });
+        }, duration * 2.7));
+        progressBarLongTimeNotificationTimers.push(setTimeout(function () {
+            M.toast({
+                html: 'Prediction Canceled'
+            });
+            lastRequest.abort()
+        }, duration * 2.7 + 5000));
         $("#nav-progress-bar").fadeIn(0)
         $("#nav-progress-bar").css({"width": "100%", "transition": duration + "ms linear"})
         if (end_func) {
@@ -135,8 +152,15 @@ $(document).ready(function () {
         }
     }
 
+    function clearIntervals(intervals) {
+        intervals.forEach(function(item, index, array) {
+            window.clearInterval(item)
+        })
+        progressBarLongTimeNotificationTimers = []
+    }
+
     function resetProgressBar() {
-        clearInterval(progressBarLongTimeNotificationTimer);
+        clearIntervals(progressBarLongTimeNotificationTimers);
         $("#nav-progress-bar").fadeOut(function () {
             $("#nav-progress-bar").css({"width": "0", "transition": "1ms linear"});
         });
@@ -169,7 +193,7 @@ $(document).ready(function () {
             $("#predict-form-btn-loader").fadeIn();
         });
 
-        $.ajax({
+        lastRequest = $.ajax({
             type: "POST",
             url: form_url,
             data: form_data,
@@ -197,8 +221,14 @@ $(document).ready(function () {
                         html: 'You\'re sending predictions too fast! Slow down.'
                     });
                 } else {
+                    if (request.responseText == null) {
+                        errorMessage = "Unknown Cause";
+                    } else {
+                        errorMessage = request.responseText + ". We have been notified of this issue.";
+                    }
+
                     M.toast({
-                        html: 'Error During Prediction: ' + request.responseText
+                        html: 'Error During Prediction: ' + errorMessage
                     });
                 }
             },

@@ -93,7 +93,7 @@
 		text-anchor: middle;
 	}
 
-	#zip_code {
+	#zip_code, #zip-code-field span.helper-text {
 		margin-left: 0;
 		margin-right: 2em;
 		width: 92%;
@@ -186,7 +186,7 @@
 						<form id="predict-form" action="/predict" method="post">
 							<div class='row valign-wrapper-med-up'>
 								<div class='col s12 m6 l4 xl5'>
-									<div class='input-field col s12'>
+									<div id='zip-code-field' class='input-field col s12'>
 										<i id="get-location-icon" class="material-icons prefix">my_location</i>
 										{{ m.render_field(predict_form.zip_code) }}
 									</div>

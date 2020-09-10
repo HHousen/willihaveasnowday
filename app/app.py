@@ -78,7 +78,7 @@ def register_errorhandlers(app):
 
     def handle_prediction_error(error):
         capture_exception(error)
-        return json.dumps(str(error)), 500
+        return str(error), 500
     app.register_error_handler(PredictionError, handle_prediction_error)
     
     return None

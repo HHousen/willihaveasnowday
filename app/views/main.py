@@ -26,6 +26,7 @@ from app.prediction_utils import used_features_list
 import pandas as pd
 
 from uszipcode import SearchEngine
+from noaa_sdk.errors import InvalidZipCodeError, RetryTimeoutError
 
 import atexit
 import time
@@ -197,7 +198,7 @@ def predict():
                 recent_prediction = check_for_recent_prediction(form.zip_code.data, unauth_user)
                 if recent_prediction:
                     return recent_prediction
-            raise PredictionError("Code 878")
+            raise PredictionError("Code 878 Recent Prediction Timeout")
         
         today = dt.datetime.now()
         if today.month in (7, 8):
@@ -207,28 +208,37 @@ def predict():
         if recent_prediction:
             return recent_prediction
 
-        currently_running_zip_codes.append(form.zip_code.data)
-
+        # Large try...finally block to always remove the currently running zip code from
+        # `currently_running_zip_codes` no matter if the code completes or crashes.
         try:
-            weather_data, text_weather, result_object = noaa_api.get_weather(form.zip_code.data, return_result_object=True)
-        except ValueError as e:
-            currently_running_zip_codes.remove(form.zip_code.data)
-            return json.dumps({"zip_code": ["Invalid zip code"]}), 400
+            currently_running_zip_codes.append(form.zip_code.data)
 
-        # Prepare model inputs
-        extra_info = {"Latitude": result_object.lat, "Longitude": result_object.lng, "State": result_object.state}
-        model_inputs = noaa_api.prepapre_model_inputs(weather_data, extra_info, used_features_list=used_features_list)
+            try:
+                weather_data, text_weather, result_object = noaa_api.get_weather(form.zip_code.data, return_result_object=True)
+            except InvalidZipCodeError as e:
+                return json.dumps({"zip_code": ["Invalid zip code"]}), 400
+            except RetryTimeoutError as e:
+                raise PredictionError("Code 775 NOAA Weather.gov Unavailable") from e
+            except Exception as e:
+                raise PredictionError("Code 141 NOAA Weather.gov Processing Error") from e
 
-        dates, offsets = noaa_api.create_weekdates(return_weekday_names=False, return_offsets=True)
-        first_prediction_date = dates[0]
+            # Prepare model inputs
+            extra_info = {"Latitude": result_object.lat, "Longitude": result_object.lng, "State": result_object.state}
+            model_inputs = noaa_api.prepapre_model_inputs(weather_data, extra_info, used_features_list=used_features_list)
 
-        # Make prediction
-        try:
+            dates, offsets = noaa_api.create_weekdates(return_weekday_names=False, return_offsets=True)
+            first_prediction_date = dates[0]
+
             model_inputs["Number of Snowdays in Year"] = [form.num_snowdays.data] * len(model_inputs[used_features_list[0]])
             # Convert to DataFrame and reorder the columns according to used_features_list
             model_inputs = pd.DataFrame(model_inputs)[used_features_list]
-            prediction_probs = app.model.predict_proba(model_inputs)
-            prediction_probs = prediction_probs[:, 0]
+            
+            # Make prediction
+            try:
+                prediction_probs = app.model.predict_proba(model_inputs)
+                prediction_probs = prediction_probs[:, 0]
+            except Exception as e:
+                raise PredictionError("Code 436 AI Model Failure") from e
 
             prediction = {"percentages": []}
 
@@ -238,35 +248,32 @@ def predict():
                 except IndexError:
                     prediction["percentages"].append(-3)  # -3 is code for "no prediction returned"
 
-        except Exception as e:
+            period_text_descriptions = noaa_api.generate_text_descriptions(text_weather)
+            period_text_descriptions = noaa_api.process_text_descriptions(period_text_descriptions)
+
+            report = PreditionReport(
+                zip_code=form.zip_code.data,
+                num_snowdays=form.num_snowdays.data,
+                model_inputs=model_inputs.to_json(),
+                model_prediction=json.dumps(prediction["percentages"]),
+                weather_text=json.dumps(period_text_descriptions),
+                first_prediction_date=first_prediction_date,
+            )
+            if current_user.is_authenticated:
+                user_predictions = UserPredictions()
+                user_predictions.user_rel = current_user
+                report.users_ids.append(user_predictions)
+            else:
+                user_predictions = UnauthUserPredictions()
+                user_predictions.unauth_user_rel = unauth_user
+                report.unauth_users_ids.append(user_predictions)
+
+            db.session.add(report)
+            db.session.commit()
+
+            return json.dumps({**prediction, "weather_text": period_text_descriptions})
+        finally:
             currently_running_zip_codes.remove(form.zip_code.data)
-            raise PredictionError("Code 436") from e
-
-        period_text_descriptions = noaa_api.generate_text_descriptions(text_weather)
-        period_text_descriptions = noaa_api.process_text_descriptions(period_text_descriptions)
-
-        report = PreditionReport(
-            zip_code=form.zip_code.data,
-            num_snowdays=form.num_snowdays.data,
-            model_inputs=model_inputs.to_json(),
-            model_prediction=json.dumps(prediction["percentages"]),
-            weather_text=json.dumps(period_text_descriptions),
-            first_prediction_date=first_prediction_date,
-        )
-        if current_user.is_authenticated:
-            user_predictions = UserPredictions()
-            user_predictions.user_rel = current_user
-            report.users_ids.append(user_predictions)
-        else:
-            user_predictions = UnauthUserPredictions()
-            user_predictions.unauth_user_rel = unauth_user
-            report.unauth_users_ids.append(user_predictions)
-
-        db.session.add(report)
-        db.session.commit()
-
-        currently_running_zip_codes.remove(form.zip_code.data)
-        return json.dumps({**prediction, "weather_text": period_text_descriptions})
     
     return json.dumps(form.errors), 400
 

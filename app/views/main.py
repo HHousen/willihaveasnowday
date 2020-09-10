@@ -43,6 +43,9 @@ currently_running_zip_codes = []
 with open("app/index_backgrounds_base64.txt", "r") as file:
     index_backgrounds_base64 = file.readlines()
 
+today = dt.datetime.now()
+is_summer = today.month in (7, 8)
+
 def create_follow_up_email(prediction_id, zip_code, user, first_prediction_date, ts, extra):
     start_token = str(extra) + "-" + str(prediction_id) + "-" + str(user.id)
     yes_token = ts.dumps(start_token + "-1", salt=current_app.config['SNOWDAY_STATUS_SALT'])
@@ -62,6 +65,8 @@ def create_follow_up_email(prediction_id, zip_code, user, first_prediction_date,
     return p
 
 def send_follow_up_emails():
+    if is_summer:
+        return
     ts = URLSafeTimedSerializer(current_app.config['SECRET_KEY'])
     
     current_date = dt.date.today()
@@ -113,7 +118,7 @@ def update_rankings():
     db.session.commit()
 
 scheduler = BackgroundScheduler()
-scheduler.add_job(func=send_follow_up_emails, trigger="cron", hour=15, minute=57, day_of_week="0-4", jitter=120)
+scheduler.add_job(func=send_follow_up_emails, trigger="cron", hour=16, minute=0, day_of_week="0-4", jitter=120)
 scheduler.add_job(func=update_rankings, trigger="cron", hour="*/3", day_of_week="1-5", jitter=120)
 scheduler.start()
 
@@ -121,6 +126,7 @@ scheduler.start()
 atexit.register(lambda: scheduler.shutdown())
 
 mainbp = Blueprint('mainbp', __name__)
+
 
 @mainbp.route('/')
 @mainbp.route('/index', methods=['GET', 'POST'])
@@ -133,7 +139,7 @@ def index():
     background = "data:image/jpeg;base64,"
     background += random.choice(index_backgrounds_base64)
 
-    return render_template('index.html', predict_form=predict_form, help_form=help_form, signed_in=current_user.is_authenticated, background=background)
+    return render_template('index.html', disable_help_improve=is_summer, predict_form=predict_form, help_form=help_form, signed_in=current_user.is_authenticated, background=background)
 
 @mainbp.route('/about')
 def about():
@@ -200,8 +206,7 @@ def predict():
                     return recent_prediction
             raise PredictionError("Code 878 Recent Prediction Timeout")
         
-        today = dt.datetime.now()
-        if today.month in (7, 8):
+        if is_summer:
             return json.dumps({"percentages": [0, 0, 0], "weather_text": "summer"})
 
         recent_prediction = check_for_recent_prediction(form.zip_code.data, unauth_user)
@@ -279,6 +284,8 @@ def predict():
 
 @mainbp.route('/help-improve', methods=['POST'])
 def help_improve():
+    if is_summer:
+        return "summer", 501
     form = help_forms.Help()
     if form.validate_on_submit():
         unauth_user = UnauthUser.query.filter_by(uuid=session['id']).first()

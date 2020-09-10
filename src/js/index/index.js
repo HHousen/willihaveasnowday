@@ -309,10 +309,10 @@ $(document).ready(function () {
                 }
             }
 
-            if (data.weather_text == null) {
+            if (data.weather_text == null || data.weather_text == "summer") {
                 for (let i = 0; i < 3; i++) {
                     $("#day-" + i + "-text").html("");
-                    $("#day-" + i + "-text-all").html("");
+                    $("#day-" + i + "-text-all").html("No additional information available.");
                 }
             } else {
                 for (let i = 0; i < data.weather_text.length; i++) {
@@ -374,6 +374,10 @@ $(document).ready(function () {
                     error_dict = JSON.parse(request.responseText);
 
                     processAjaxErrors(error_dict);
+                } else if (request.responseText == "summer") {
+                    M.toast({
+                        html: "It's the summer. You can not submit improvement reports in the summer."
+                    });
                 } else {
                     M.toast({
                         html: 'Error submitting email: ' + request.responseText

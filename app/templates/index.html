@@ -345,6 +345,11 @@
 <div id="help-improve" class="modal">
 	<div class="modal-content">
 		<h4>Help Improve The AI Predictions</h4>
+		{% if disable_help_improve %}
+			<p><strong>This feature is disable during the summer.</strong></p>
+			<p>The following explains how this feature will operate once summer ends and the school year begins at the end of August.</p>
+			<div class="divider"></div>
+		{% endif %}
 		{% if signed_in %}
 		<p>Since you are signed into an account we will follow up with you at 4:00pm the day of the predicted snow day
 			regarding every unique prediction you make. All you have to do is press one button in the email: "Yes I had
@@ -358,10 +363,13 @@
 			that we have no snow day data for.</p>
 		<p>Every prediction made has the potential to improve all future predictions. All we need is one crucial piece
 			of information: whether or not you actually had a snow day.</p>
+		{% if not disable_help_improve %}
 		<p>Enter your email in the box below and we will follow up with you about this prediction at 4:00pm EST the day of
-			the predicted snow day. All you have to do is press one button in the email: "Yes I had a snow day" or "No I
-			did not have a snow day".</p>
-
+			the predicted snow day.</p>
+		{% endif %}
+		<p>You just need to press one button in the email: "Yes I had a snow day" or "No I did not have a snow day".</p>
+		
+		{% if not disable_help_improve %}
 		<form id="help-form" action="/help-improve" method="post">
 			<div class='row'>
 				<div class='col s12 m12 l9' style="padding-left: 0px;">
@@ -371,7 +379,7 @@
 				</div>
 
 				<div class='col s12 m12 l3'>
-					<button type='submit' name='btn_predict' class='col s12 btn btn-large waves-effect'><i
+					<button type='submit' name='btn_help_improve' class='col s12 btn btn-large waves-effect'><i
 							class="material-icons right">send</i>Save</button>
 				</div>
 			</div>
@@ -379,6 +387,7 @@
 		</form>
 
 		<p>Once we receive your response we delete your email address. No spam.</p>
+		{% endif %}
 		{% endif %}
 	</div>
 	<div class="modal-footer">

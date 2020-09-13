@@ -23,7 +23,9 @@ def create_app(config_object='app.settings'):
     # an application context. We can load this in a view with `app.model`.
     with app.app_context():
         global model
+        global main_app
         model = joblib.load(current_app.config['MODEL_PATH'])
+        main_app = app
 
     setup_sentry()
     register_extensions(app)

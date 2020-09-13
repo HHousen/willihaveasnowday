@@ -10,6 +10,8 @@ from app.forms import user as user_forms
 from app.toolbox import email
 from app.decorators import already_signed_in
 
+from sendgrid.helpers.mail import From
+
 # Setup Stripe integration
 import stripe
 import json
@@ -54,7 +56,7 @@ def signup():
         # Render an HTML template to send by email
         html = render_template('email/confirm.html', confirm_url=confirmUrl)
         # Send the email to user
-        email.send(user.email, subject, html, from_email=current_app.config['REGISTER_FROM_EMAIL'])
+        email.send(user.email, subject, html, from_email=From(email=current_app.config['REGISTER_FROM_EMAIL'], name="Accounts @ WilliHaveASnowDay.com"))
         # Send back to the home page
         flash('Check your email to confirm your email address', 'positive')
         return redirect(url_for('mainbp.index'))
@@ -171,7 +173,7 @@ def forgot():
             # Render an HTML template to send by email
             html = render_template('email/reset.html', reset_url=resetUrl)
             # Send the email to user
-            email.send(user.email, subject, html, from_email=current_app.config['REGISTER_FROM_EMAIL'])
+            email.send(user.email, subject, html, from_email=From(email=current_app.config['REGISTER_FROM_EMAIL'], name="Accounts @ WilliHaveASnowDay.com"))
             # Send back to the home page
             flash('Check your emails to reset your password', 'positive')
             return redirect(url_for('mainbp.index'))

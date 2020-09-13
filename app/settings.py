@@ -33,6 +33,8 @@ LOG_FILENAME = env.str('LOG_FILENAME', default='activity.log')
 LOG_MAXBYTES = env.int('LOG_MAXBYTS', default=1024)
 LOG_BACKUPS = env.int('LOG_BACKUPS', default=0)
 
+SERVER_NAME = env.str('SERVER_NAME', default='127.0.0.1:5000')
+
 SNOWDAY_STATUS_SALT = env.str('SNOWDAY_STATUS_SALT', default='snowday-status-salt')
 EMAIL_CONFIRM_SALT = env.str('EMAIL_CONFIRM_SALT', default='email-confirm-salt')
 PASSWORD_RESET_SALT = env.str('PASSWORD_RESET_SALT', default='password-reset-salt')

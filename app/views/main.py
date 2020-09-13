@@ -46,76 +46,123 @@ with open("app/index_backgrounds_base64.txt", "r") as file:
 today = dt.datetime.now()
 is_summer = today.month in (7, 8)
 
-def create_follow_up_email(prediction_id, zip_code, user, first_prediction_date, ts, extra):
-    start_token = str(extra) + "-" + str(prediction_id) + "-" + str(user.id)
-    yes_token = ts.dumps(start_token + "-1", salt=current_app.config['SNOWDAY_STATUS_SALT'])
-    yes_url = url_for('mainbp.snowday_status', token=yes_token, _external=True)
-    no_token = ts.dumps(start_token + "-0", salt=current_app.config['SNOWDAY_STATUS_SALT'])
-    no_url = url_for('mainbp.snowday_status', token=no_token, _external=True)
+def create_follow_up_email_mul_zip(prediction_ids, zip_codes, user, first_prediction_date, ts, extra):
+    if extra == "un":
+        extra_message = 'If you would like to keep track of your contributions and see your rank on the <a href="https://willihaveasnowday.com/leaderboard">leaderboard</a> then <a href="https://willihaveasnowday.com/user/signup">sign up for an account</a>.'
+    else:
+        extra_message = ""
 
     p = Personalization()
-    to_object = To(email=user.email, substitutions=[
-        Substitution('((yes_url))', yes_url, p),
-        Substitution('((no_url))', no_url, p),
-        Substitution('((zip_code))', zip_code),
-        Substitution('((date))', first_prediction_date.strftime('%Y-%m-%d'))
-    ])
+    substitutions = [
+        Substitution('((date))', first_prediction_date.strftime('%Y-%m-%d'), p),
+        Substitution('((extra_message))', extra_message, p),
+    ]
+
+    for idx, (prediction_id, zip_code) in enumerate(zip(prediction_ids, zip_codes)):
+        start_token = str(extra) + "-" + str(prediction_id) + "-" + str(user.id)
+        yes_token = ts.dumps(start_token + "-1", salt=current_app.config['SNOWDAY_STATUS_SALT'])
+        yes_url = url_for('mainbp.snowday_status', token=yes_token, _external=True)
+        no_token = ts.dumps(start_token + "-0", salt=current_app.config['SNOWDAY_STATUS_SALT'])
+        no_url = url_for('mainbp.snowday_status', token=no_token, _external=True)
+
+        substitutions.append(Substitution('((yes_url_' + str(idx) + '))', yes_url, p))
+        substitutions.append(Substitution('((no_url_' + str(idx) + '))', no_url, p))
+        substitutions.append(Substitution('((zip_code_' + str(idx) + '))', zip_code, p))
+    
+    p = Personalization()
+    to_object = To(email=user.email, substitutions=substitutions)
     p.add_to(to_object)
 
     return p
 
+
 def send_follow_up_emails():
-    if is_summer:
-        return
-    ts = URLSafeTimedSerializer(current_app.config['SECRET_KEY'])
-    
-    current_date = dt.date.today()
-    # today = dt.datetime.today().replace(hour=12, minute=0, second=0).strftime('%Y-%m-%d %H:%M:%S')
-    # yesterday = (dt.datetime.now() - dt.timedelta(1)).replace(hour=12, minute=0, second=0).strftime('%Y-%m-%d %H:%M:%S')
-    
-    to_emails = []
-    distinct_zip_codes = PreditionReport.query.with_entities(PreditionReport.zip_code).distinct().all()
-    distinct_zip_codes = [x[0] for x in distinct_zip_codes]
-
-    for zip_code in distinct_zip_codes:
-        predictions = PreditionReport.query.filter(PreditionReport.first_prediction_date == current_date, PreditionReport.emailed == False, PreditionReport.zip_code == zip_code).all()
-        # predictions = PreditionReport.query.filter(PreditionReport.created_at.between(yesterday, today), PreditionReport.emailed == False, PreditionReport.zip_code == zip_code).all()
-
-        # current_date = predictions[0].first_prediction_date
-
-        users = set([assoc.user_rel for prediction in predictions for assoc in prediction.users_ids])
-        unauth_users = set([assoc.unauth_user_rel for prediction in predictions for assoc in prediction.unauth_users_ids])
-
-        predictions_ids = [str(prediction.id) for prediction in predictions]
-        predictions_ids_tokenized = ",".join(predictions_ids)
-
-        for user in users:
-            p = create_follow_up_email(predictions_ids_tokenized, zip_code, user, current_date, ts, extra="full")
-            to_emails.append(p)
-        for unauth_user in unauth_users:
-            p = create_follow_up_email(predictions_ids_tokenized, zip_code, unauth_user, current_date, ts, extra="un")
-            to_emails.append(p)
+    with app.main_app.app_context():
+        if is_summer:
+            return
+        ts = URLSafeTimedSerializer(current_app.config['SECRET_KEY'])
         
-        for prediction in predictions:
-            prediction.emailed = True
-            db.session.commit()
-    
-    html = render_template('email/improve.html', signed_in=current_user.is_authenticated)
-    email.send(
-        recipient=None,
-        personalizations=to_emails,
-        subject="Was our prediction right? - WillIHaveASnowDay.com",
-        body=html,
-        from_email=From(email=current_app.config['IMPROVE_FROM_EMAIL'], name="Help Improve @ WilliHaveASnowDay.com"),
-        sendgrid_only=True
-    )
+        current_date = dt.date.today()
+        # today = dt.datetime.today().replace(hour=12, minute=0, second=0).strftime('%Y-%m-%d %H:%M:%S')
+        # yesterday = (dt.datetime.now() - dt.timedelta(1)).replace(hour=12, minute=0, second=0).strftime('%Y-%m-%d %H:%M:%S')
+        
+        to_emails = []
+        distinct_zip_codes = PreditionReport.query.with_entities(PreditionReport.zip_code).distinct().all()
+        distinct_zip_codes = [x[0] for x in distinct_zip_codes]
+
+        user_emails_dict = {}
+
+        for zip_code in distinct_zip_codes:
+            predictions = PreditionReport.query.filter(PreditionReport.first_prediction_date == current_date, PreditionReport.emailed.is_(False), PreditionReport.zip_code == zip_code).all()
+            # predictions = PreditionReport.query.filter(PreditionReport.created_at.between(yesterday, today), PreditionReport.emailed == False, PreditionReport.zip_code == zip_code).all()
+
+            # current_date = predictions[0].first_prediction_date
+
+            users = set([assoc.user_rel for prediction in predictions for assoc in prediction.users_ids])
+            unauth_users = set([assoc.unauth_user_rel for prediction in predictions for assoc in prediction.unauth_users_ids])
+
+            predictions_ids = [str(prediction.id) for prediction in predictions]
+            predictions_ids_tokenized = ",".join(predictions_ids)
+
+            for user in users:
+                user_email_info = {"predictions_ids_tokenized": predictions_ids_tokenized, "zip_code": zip_code, "extra": "full"}
+                try:
+                    user_emails_dict[user].append(user_email_info)
+                except:
+                    user_emails_dict[user] = [user_email_info]
+                
+                # p = create_follow_up_email(predictions_ids_tokenized, zip_code, user, current_date, ts, extra="full")
+                # to_emails.append(p)
+            for unauth_user in unauth_users:
+                user_email_info = {"predictions_ids_tokenized": predictions_ids_tokenized, "zip_code": zip_code, "extra": "un"}
+                try:
+                    user_emails_dict[unauth_user].append(user_email_info)
+                except:
+                    user_emails_dict[unauth_user] = [user_email_info]
+                # p = create_follow_up_email(predictions_ids_tokenized, zip_code, unauth_user, current_date, ts, extra="un")
+                # to_emails.append(p)
+            
+            for prediction in predictions:
+                prediction.emailed = True
+                db.session.commit()
+        
+        emails_by_num_zip_codes = {}
+        for user, emails in user_emails_dict.items():
+            num_emails = len(emails)
+            if num_emails > 1:
+                # Next line based on: https://stackoverflow.com/a/33046935
+                emails = {k: [dic[k] for dic in emails] for k in emails[0]}
+                p = create_follow_up_email_mul_zip(emails["predictions_ids_tokenized"], emails["zip_code"], user, current_date, ts, extra=emails["extra"][0])
+            else:
+                num_emails = 1
+                emails = emails[0]
+                p = create_follow_up_email_mul_zip([emails["predictions_ids_tokenized"]], [emails["zip_code"]], user, current_date, ts, extra=emails["extra"])
+            
+            try:
+                emails_by_num_zip_codes[num_emails].append(p)
+            except KeyError:
+                emails_by_num_zip_codes[num_emails] = [p]
+
+        for num_zip_codes, to_emails in emails_by_num_zip_codes.items():
+            if num_zip_codes > 1:
+                html = render_template('email/improve_multiple.html', num_zip_codes=num_zip_codes)
+            else:
+                html = render_template('email/improve.html')
+            email.send(
+                recipient=None,
+                personalizations=to_emails,
+                subject="Was our prediction right? - WillIHaveASnowDay.com",
+                body=html,
+                from_email=From(email=current_app.config['IMPROVE_FROM_EMAIL'], name="Help Improve @ WilliHaveASnowDay.com"),
+                sendgrid_only=True
+            )
 
 def update_rankings():
-    u1 = aliased(User)
-    subq = db.session.query(func.count(u1.id)).filter(u1.points > User.points).as_scalar()
-    print(subq)
-    User.query.update({"rank": subq + 1}, synchronize_session=False)
-    db.session.commit()
+    with app.main_app.app_context():
+        u1 = aliased(User)
+        subq = db.session.query(func.count(u1.id)).filter(u1.points > User.points).as_scalar()
+        User.query.update({"rank": subq + 1}, synchronize_session=False)
+        db.session.commit()
 
 scheduler = BackgroundScheduler()
 scheduler.add_job(func=send_follow_up_emails, trigger="cron", hour=16, minute=0, day_of_week="0-4", jitter=120)

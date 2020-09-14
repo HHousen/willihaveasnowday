@@ -234,8 +234,18 @@ def check_for_recent_prediction(zip_code, unauth_user):
     
     return False
 
+def prediction_error_json(func):
+    def wrapper():
+        try:
+            return func()
+        except PredictionError:
+            raise
+        except Exception as e:
+            raise PredictionError("Code 245 Unknown Error") from e
+    return wrapper
 
 @mainbp.route('/predict', methods=['POST'])
+@prediction_error_json
 @limiter.limit("4 per minute")
 def predict():
     if current_user.is_authenticated:

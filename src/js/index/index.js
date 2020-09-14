@@ -212,7 +212,9 @@ $(document).ready(function () {
             },
             error: function (request, status, error) {
                 stopAnimateProgressBar();
-                $("#predict-form-submit-btn").removeClass("disabled")
+
+                $("#predict-form-submit-btn").removeClass("disabled");
+
                 if (request.status == "400") {
                     error_dict = JSON.parse(request.responseText);
                     processAjaxErrors(error_dict);
@@ -234,6 +236,7 @@ $(document).ready(function () {
             },
             complete: function (request, status) {
                 $("#predict-form-btn-loader").stop().fadeOut(function () {
+                    $("#predict-form-btn-loader").fadeOut(0);
                     $("#predict-form-submit-btn").stop().fadeIn();
                 })
             }

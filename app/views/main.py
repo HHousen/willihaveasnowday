@@ -204,7 +204,7 @@ def reverse_geocode():
         result_obj = search.by_coordinates(lat=latitude, lng=longitude, radius=10, returns=1)[0]
         return result_obj.zipcode
     
-    return "Incorrect data type submitted", 400
+    return json.dumps("Incorrect data type submitted"), 400
 
 def check_for_recent_prediction(zip_code, unauth_user):
     last_prediction = PreditionReport.get_recent_prediction(zip_code)
@@ -398,6 +398,7 @@ def snowday_status(token):
 
 
 @mainbp.route('/contact', methods=['GET', 'POST'])
+@limiter.limit("4 per day", error_message="You may only send 4 messages per day.")
 def contact():
     form = contact_forms.Contact()
     if form.validate_on_submit():

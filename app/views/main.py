@@ -200,7 +200,7 @@ def reverse_geocode():
         latitude = request.json["latitude"]
         longitude = request.json["longitude"]
         
-        search = SearchEngine(simple_zipcode=True)
+        search = SearchEngine(simple_zipcode=True, db_file_dir="app/uszipcode/")
         result_obj = search.by_coordinates(lat=latitude, lng=longitude, radius=10, returns=1)[0]
         return result_obj.zipcode
     
@@ -267,7 +267,7 @@ def predict():
             currently_running_zip_codes.append(form.zip_code.data)
 
             try:
-                weather_data, text_weather, result_object = noaa_api.get_weather(form.zip_code.data, return_result_object=True)
+                weather_data, text_weather, result_object = noaa_api.get_weather(form.zip_code.data, return_result_object=True, db_file_dir="app/uszipcode/")
             except InvalidZipCodeError as e:
                 return json.dumps({"zip_code": ["Invalid zip code"]}), 400
             except RetryTimeoutError as e:

@@ -6,10 +6,10 @@ from noaa_sdk import noaa
 import pandas as pd
 import numpy as np
 
-def get_weather(zip_code, country='US', return_result_object=False):
+def get_weather(zip_code, country='US', return_result_object=False, db_file_dir=None):
     n = noaa.NOAA(user_agent="Snow Day Predictor <hayden@haydenhousen.com>")
 
-    forecast_response = n.get_forecasts(zip_code, country, data_type=["grid", None], return_result_object=return_result_object)
+    forecast_response = n.get_forecasts(zip_code, country, data_type=["grid", None], return_result_object=return_result_object, db_file_dir=db_file_dir)
     
     if return_result_object:
         (weather_data, text_weather), result_object = forecast_response

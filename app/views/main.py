@@ -307,7 +307,7 @@ def predict():
             report = PreditionReport(
                 zip_code=form.zip_code.data,
                 num_snowdays=form.num_snowdays.data,
-                model_inputs=model_inputs.to_json(),
+                model_inputs=model_inputs.round(1).to_json(orient="values"),
                 model_prediction=json.dumps(prediction["percentages"]),
                 weather_text=json.dumps(period_text_descriptions),
                 first_prediction_date=first_prediction_date,

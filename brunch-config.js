@@ -17,7 +17,7 @@ exports.plugins = {
         sourceMapEmbed: true
     },
     postcss: {
-        processors: [require('autoprefixer')]
+        processors: [require('autoprefixer')()]
     },
     terser: {
         mangle: true,

@@ -105,11 +105,12 @@ def send_follow_up_emails():
             predictions_ids_tokenized = ",".join(predictions_ids)
 
             for user in users:
-                user_email_info = {"predictions_ids_tokenized": predictions_ids_tokenized, "zip_code": zip_code, "extra": "full"}
-                try:
-                    user_emails_dict[user].append(user_email_info)
-                except:
-                    user_emails_dict[user] = [user_email_info]
+                if user.receive_improve_emails:
+                    user_email_info = {"predictions_ids_tokenized": predictions_ids_tokenized, "zip_code": zip_code, "extra": "full"}
+                    try:
+                        user_emails_dict[user].append(user_email_info)
+                    except:
+                        user_emails_dict[user] = [user_email_info]
                 
                 # p = create_follow_up_email(predictions_ids_tokenized, zip_code, user, current_date, ts, extra="full")
                 # to_emails.append(p)

@@ -28,6 +28,7 @@ class User(db.Model, UserMixin):
     credits = db.Column(db.Integer(), nullable=True, default=0)
     points = db.Column(db.Integer(), nullable=True, default=0)
     rank = db.Column(db.Integer(), nullable=True, default=0)
+    receive_improve_emails = db.Column(db.Boolean(), default=True)
     customer_id = db.Column(db.String(40), nullable=True)
     _password = db.Column(db.Binary(60), nullable=False)
 

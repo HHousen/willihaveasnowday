@@ -23,6 +23,17 @@
                     <div class="row">
                         <a href="#change-password" class="waves-effect waves-light btn modal-trigger">Change Password</a>
                     </div>
+                    <div class="row">
+                        <p style="margin-bottom: 0;">Receive Improve Emails <a class="modal-trigger" href="#improve-emails"><i class="material-icons">help_outline</i></a></p>
+                        <div class="switch">
+                            <label>
+                                Off
+                                <input id="receive-improve-emails-checkbox" type="checkbox" {% if receive_improve_emails %}checked="checked"{% endif %}>
+                                <span class="lever"></span>
+                                On
+                            </label>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -44,6 +55,22 @@
             <p><strong>One point</strong> is gained for <strong>each email</strong> you respond to by clicking the button indicating you had a snow day or the one indicating you had school.</p>
             <p>You will be <strong>given a point regardless of the button you press</strong> because data for snow days and open days are equally valuable.</p>
             <p><strong class="red-text">Important Note:</strong> You may be <strong>temporally banned</strong> from gaining points if you respond to a <strong>large number predictions</strong> across a <strong>large geographic area</strong> in a <strong>short period of time</strong>. Additionally, you may be <strong>temporally banned</strong> if the majority of reports for a zip code continuously disagree with your reports. In short, <strong>don't try to game the system</strong>. Thanks!</p>
+        </div>
+        <div class="modal-footer">
+            <a href="#!" class="modal-close waves-effect waves-red btn-flat">Close</a>
+        </div>
+    </div>
+    <div id="improve-emails" class="modal">
+        <div class="modal-content">
+            <h4>Improve Emails Info</h4>
+            <p>Since you are signed into an account we will follow up with you at 4:00pm the day of the predicted snow day
+                regarding every unique prediction you make. All you have to do is press one button in the email: "Yes I had
+                a snow day" or "No I did not have a snow day".</p>
+            <p>A unique prediction means each zip code. You will only be emailed once if you make several predictions for
+                the same zip code.</p>
+            <p>Additionally, since you are signed in, you can track your contributions and see how you compare to others on
+                the <a href="{{ url_for('mainbp.leaderboard') }}">leaderboard</a>.</p>
+            <p><strong>You can disable or enable these emails by toggling this switch.</strong> If disabled, you will be unable to earn points.</p>
         </div>
         <div class="modal-footer">
             <a href="#!" class="modal-close waves-effect waves-red btn-flat">Close</a>

@@ -95,3 +95,41 @@ $("#change-username-form").submit(function (e) {
 
     sendAjaxRequest(form_url, form_data, "#change-username", "Error Changing Username: ", successTimeoutFunc, "You can only change your username once every hour")
 });
+
+$("#receive-improve-emails-checkbox").change(function(){
+    if($(this).is(':checked')) {
+        data = 1
+    } else {
+        data = 0
+    }
+    console.log(data)
+    $.ajax({
+        type: "POST",
+        url: "/user/improve-emails-toggle",
+        contentType: "application/json",
+        data: JSON.stringify({"state": data}),
+        success: function (data) {
+            data = JSON.parse(data);
+            if (data == 1) {
+                M.toast({
+                    html: "You will now receive improve emails."
+                });
+            } else {
+                M.toast({
+                    html: "You will no longer receive improve emails."
+                });
+            }
+        },
+        error: function (request, status, error) {
+            if (request.status == "429") {
+                M.toast({
+                    html: "You are changing this option too fast. Please slow down..."
+                });
+            } else {
+                M.toast({
+                    html: "Error Toggling Improve Emails: " + request.responseText
+                });
+            }
+        }
+    });
+});

@@ -118,7 +118,7 @@ def signout():
 def account():
     change_password_form = user_forms.ChangePassword()
     change_username_form = user_forms.ChangeUsername()
-    return render_template('user/account.html', change_password_form=change_password_form, change_username_form=change_username_form, title='Account')
+    return render_template('user/account.html', receive_improve_emails=current_user.receive_improve_emails, change_password_form=change_password_form, change_username_form=change_username_form, title='Account')
 
 
 @userbp.route('/change-password', methods=['POST'])
@@ -153,6 +153,25 @@ def change_username():
         return json.dumps('Your username has been changed'), 200
 
     return json.dumps(form.errors), 400
+
+@userbp.route('/improve-emails-toggle', methods=['POST'])
+@login_required
+@limiter.limit("5 per minute")
+def toggle_improve_emails():
+    if request.json is not None:
+        switch_state = request.json["state"]
+        if switch_state == 1:
+            current_user.receive_improve_emails = True
+            db.session.commit()
+            return json.dumps(1)
+        elif switch_state == 0:
+            current_user.receive_improve_emails = False
+            db.session.commit()
+            return json.dumps(0)
+        else:
+            return json.dumps("Invalid checkbox state"), 400
+    else:
+        return json.dumps("Invalid data submitted"), 400
 
 
 @userbp.route('/forgot', methods=['GET', 'POST'])

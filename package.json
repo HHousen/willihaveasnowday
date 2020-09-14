@@ -20,14 +20,14 @@
   },
   "homepage": "https://github.com/HHousen/willihaveasnowday#readme",
   "dependencies": {
-    "brunch": "^2.10.17"
+    "brunch": "^3.0.0"
   },
   "devDependencies": {
     "autoprefixer": "^9.8.6",
-    "brunch": "^2.10.17",
-    "concurrently": "^4.1.0",
+    "brunch": "^3.0.0",
+    "concurrently": "^5.3.0",
     "postcss-brunch": "^3.0.0",
-    "sass-brunch": "^2.10.8",
+    "sass-brunch": "^3.0.0",
     "terser-brunch": "^4.0.0"
   }
 }

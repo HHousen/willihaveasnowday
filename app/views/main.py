@@ -176,12 +176,15 @@ atexit.register(lambda: scheduler.shutdown())
 mainbp = Blueprint('mainbp', __name__)
 
 
-@mainbp.route('/')
-@mainbp.route('/index', methods=['GET', 'POST'])
-def index():
+def set_session_id():
     if not current_user.is_authenticated:
         if 'id' not in session:
             session['id'] = str(uuid.uuid4())
+
+@mainbp.route('/')
+@mainbp.route('/index', methods=['GET', 'POST'])
+def index():
+    set_session_id()
     predict_form = predict_forms.Predict()
     help_form = help_forms.Help()
     background = "data:image/jpeg;base64,"
@@ -238,6 +241,7 @@ def predict():
     if current_user.is_authenticated:
         unauth_user = None
     else:
+        set_session_id()
         unauth_user = UnauthUser.query.filter_by(uuid=session['id']).first()
         if not unauth_user:
             unauth_user = UnauthUser(uuid=session['id'])

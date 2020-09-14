@@ -285,7 +285,7 @@ $(document).ready(function () {
             for (let i = 0; i < data.percentages.length; i++) {
                 const element = data.percentages[i];
                 
-                $("#day-" + i + "-card").css("opacity", "1");
+                $("#day-" + i + "-card").css({"opacity": "1", "overflow": "visible"});
 
                 var circleBarChance = $("#day-" + i + "-card .card-content svg path.circle");
                 var circleTextChance = $("#day-" + i + "-card .card-content svg text.percentage");
@@ -335,6 +335,8 @@ $(document).ready(function () {
             }
 
             $("#help-improve-btn").fadeIn(0);
+
+            $(".card-reveal").css({"display": "none", "transform": "translateY(0%)"});
 
             window.scrollTo(0, 0);
             $("#results-panel").fadeIn("slow", function () {
@@ -390,6 +392,8 @@ $(document).ready(function () {
     });
 
     $("#go-back-btn").on("click", function () {
+        $("#predict-form-btn-loader").fadeOut(0);
+        $("#predict-form-submit-btn").fadeIn(0);
         $("#results-panel").fadeOut("slow", function () {
             $("#predict-panel").fadeIn("slow");
         });

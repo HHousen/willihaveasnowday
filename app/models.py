@@ -20,7 +20,7 @@ class User(db.Model, UserMixin):
     __tablename__ = 'users'
 
     id = db.Column(db.Integer, primary_key=True, unique=True, nullable=False)
-    alt_id = db.Column(db.String(32), unique=True, nullable=False, default=uuid_str)
+    alt_id = db.Column(db.String(36), unique=True, nullable=False, default=uuid_str)
     username = db.Column(db.String(30), unique=True, nullable=False)
     email = db.Column(db.String(80), unique=True, nullable=False)
     confirmation = db.Column(db.Boolean(), nullable=False, default=False)
@@ -88,7 +88,7 @@ class PreditionReport(db.Model):
     model_inputs = db.Column(db.String(300), nullable=False)
     model_prediction = db.Column(db.String(30), nullable=False)
     emailed = db.Column(db.Boolean(), nullable=False, default=False)
-    weather_text = db.Column(db.String(200), nullable=True)
+    weather_text = db.Column(db.String(500), nullable=True)
     first_prediction_date = db.Column(db.Date(), nullable=False)
 
     unauth_users_ids = relationship("UnauthUserPredictions", back_populates="report")
@@ -107,7 +107,7 @@ class UnauthUser(db.Model):
     __tablename__ = 'unauth_users'
 
     id = db.Column(db.Integer, primary_key=True)
-    uuid = db.Column(db.String(32), unique=True, nullable=False)
+    uuid = db.Column(db.String(36), unique=True, nullable=False)
     email = db.Column(db.String(80), unique=True, nullable=True)
 
     predictions = relationship("UnauthUserPredictions", back_populates="unauth_user_rel")

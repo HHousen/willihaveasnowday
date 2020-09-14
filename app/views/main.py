@@ -416,3 +416,7 @@ def leaderboard():
     users = User.query.order_by(-User.points).limit(50).all()
     users = [(user.username, user.points, user.avatar(50)) for user in users]
     return render_template('leaderboard.html', users=users, title="Leaderboard")
+
+@mainbp.route('/privacy-policy')
+def privacy_policy():
+    return render_template('privacy-policy.html', title="Privacy Policy")

@@ -61,3 +61,12 @@ footer.page-footer {
     transform: translateX(0%) !important;
   }
 }
+
+@media #{$medium-and-up} {
+  .right-md-and-up {
+    float: right;
+  }
+  .left-md-and-up {
+    float: left;
+  }
+}

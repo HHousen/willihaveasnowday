@@ -32,6 +32,7 @@ Flask-Minify = "*"
 joblib = "*"
 scikit-learn = "*"
 xgboost = "*"
+cmake = ">=3.18"
 
 [dev-packages]
 

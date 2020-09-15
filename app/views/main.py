@@ -423,7 +423,7 @@ def contact():
             flash('Your message failed to send', 'negative')
         return redirect(url_for('mainbp.index'))
     
-    return render_template('contact.html', form=form, title="About")
+    return render_template('contact.html', form=form, title="Contact")
 
 @mainbp.route('/leaderboard')
 def leaderboard():

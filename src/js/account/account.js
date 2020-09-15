@@ -1,33 +1,3 @@
-function processAjaxErrors(error_dict) {
-    for (var key of Object.keys(error_dict)) {
-        M.toast({
-            html: key + ': ' + error_dict[key]
-        });
-        var form_element = $("#" + key).parent();
-        var prev_helper_text = form_element.find('.helper-text');
-        var new_error = $(
-            '<span class="helper-text red-text left" style="display:none;">' +
-            error_dict[key] + '</span>');
-
-        if (prev_helper_text.length !== 0) {
-            prev_helper_text.fadeOut(function () {
-                prev_helper_text.remove();
-                form_element.append(new_error);
-                new_error.fadeIn();
-            })
-        } else {
-            form_element.append(new_error);
-            new_error.fadeIn();
-        }
-    }
-}
-
-function removeErrors() {
-    $(".helper-text").fadeOut(function () {
-        $(".helper-text").remove();
-    })
-}
-
 function sendAjaxRequest(form_url, form_data, modal, error_text, successTimeoutFunc, message_429) {
     $.ajax({
         type: "POST",
@@ -45,7 +15,7 @@ function sendAjaxRequest(form_url, form_data, modal, error_text, successTimeoutF
         error: function (request, status, error) {
             if (request.status == "400") {
                 error_dict = JSON.parse(request.responseText);
-                processAjaxErrors(error_dict);
+                processAjaxErrors([error_dict]);
             } else if (request.status == "429") {
                 M.toast({
                     html: message_429
@@ -102,7 +72,7 @@ $("#receive-improve-emails-checkbox").change(function(){
     } else {
         data = 0
     }
-    console.log(data)
+
     $.ajax({
         type: "POST",
         url: "/user/improve-emails-toggle",

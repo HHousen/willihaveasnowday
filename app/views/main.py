@@ -412,18 +412,18 @@ def snowday_status(token):
 
 
 @mainbp.route('/contact', methods=['GET', 'POST'])
-@limiter.limit("4 per day", error_message="You may only send 4 messages per day.")
+@limiter.limit("20 per hour")
 def contact():
-    form = contact_forms.Contact()
-    if form.validate_on_submit():
-        status, response = email.send(current_app.config['CONTACT_EMAIL'], "[WIHASD Support] " + str(form.subject.data), form.message.data, from_email=form.email.data)
-        if status == "success":
-            flash('Your message has been sent', 'positive')
-        elif status == "fail":
-            flash('Your message failed to send', 'negative')
-        return redirect(url_for('mainbp.index'))
+    # form = contact_forms.Contact()
+    # if form.validate_on_submit():
+    #     status, response = email.send(current_app.config['CONTACT_EMAIL'], "[WIHASD Support] " + str(form.subject.data), form.message.data, from_email=form.email.data)
+    #     if status == "success":
+    #         flash('Your message has been sent', 'positive')
+    #     elif status == "fail":
+    #         flash('Your message failed to send', 'negative')
+    #     return redirect(url_for('mainbp.index'))
     
-    return render_template('contact.html', form=form, title="Contact")
+    return render_template('contact.html', title="Contact")
 
 @mainbp.route('/leaderboard')
 def leaderboard():

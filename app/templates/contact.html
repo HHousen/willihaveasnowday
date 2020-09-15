@@ -12,7 +12,7 @@
                         <label for="name">Name</label>
                     </div>
                     <div class="input-field col s12 m6">
-                        <input class="validate invalid" id="email" name="email" required="" type="text" value="">
+                        <input class="validate" id="email" name="email" required="" type="email" value="">
                         <label for="email" class="">From Email Address</label>
                     </div>
                 </div>
@@ -33,39 +33,6 @@
                     <button type="submit" class="btn btn-large waves-effect right"><i class="material-icons right">send</i>Send</button>
                 </div>
             </form>
-
-            <form class="col s12" action="/contact" method="post">
-                <div class='row'>
-                    <div class='input-field col s12 m6'>
-                        {{ m.render_field(form.name) }}
-                    </div>
-                    <div class='input-field col s12 m6'>
-                        {{ m.render_field(form.email) }}
-                    </div>
-                </div>
-                <div class='row'>
-                    <div class='input-field col s12'>
-                        {{ m.render_field(form.subject) }}
-                    </div>
-                </div>
-                <div class='row'>
-                    <div class='input-field col s12'>
-                        {{ form.message(name_=form.message.name, id=form.message.name, class="validate materialize-textarea") }}
-                        <label for="{{ form.message.name }}">{{ form.message.description|title }}</label>
-                        {% if form.message.errors %}
-                            {% for error in form.message.errors %}
-                            <span class="helper-text red-text left">{{ error }}</span>
-                            {% endfor %}
-                        {% endif %}
-                    </div>
-                </div>
-
-                
-                <div class='row' style="margin-bottom: 20px">
-                    <button type='submit' class='btn btn-large waves-effect right'><i class="material-icons right">send</i>Send</button>
-                </div>
-                {{ form.csrf_token }}
-            </form>
         </div>
         <div class="col s12 m4 l3">
             <!-- WIHASD Contact -->
@@ -84,6 +51,6 @@
 {% endblock %}
 
 {% block final %}
-<script src="https://s.pageclip.co/v1/pageclip.js" charset="utf-8"></script>
+<script async src="{{ url_for('static', filename='js/contact.js') }}"></script>
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
 {% endblock %}

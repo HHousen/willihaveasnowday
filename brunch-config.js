@@ -6,7 +6,8 @@ exports.files = {
         joinTo: {
             'js/scripts.js': /scripts/,
             'js/index.js': /index/,
-            'js/account.js': /account/,
+            'js/account.js': [/form_functions/, /account/],
+            'js/contact.js': [/form_functions/, /contact/],
         }
     }
 };

@@ -123,7 +123,7 @@ def account():
 
 @userbp.route('/change-password', methods=['POST'])
 @login_required
-@limiter.limit("1 per minute")
+@limiter.limit("4 per minute")
 def change_password():
     form = user_forms.ChangePassword()
     
@@ -143,7 +143,7 @@ def change_password():
 
 @userbp.route('/change-username', methods=['POST'])
 @login_required
-@limiter.limit("1 per hour")
+@limiter.limit("3 per hour")
 def change_username():
     form = user_forms.ChangeUsername()
     

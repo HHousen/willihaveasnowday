@@ -2,7 +2,7 @@ from flask import Flask, render_template, current_app
 from app import commands, admin
 from app.views import user, main
 from app.models import User
-from app.extensions import bcrypt, db, toolbar, login_manager, mail, limiter, minifier
+from app.extensions import bcrypt, db, toolbar, login_manager, mail, limiter, minifier, sitemap
 from app.logger_setup import logger_setup
 from app.custom_errors import PredictionError
 import json
@@ -48,6 +48,7 @@ def register_extensions(app):
     mail.init_app(app)
     limiter.init_app(app)
     minifier.init_app(app)
+    sitemap.init_app(app)
     return None
 
 def register_blueprints(app):

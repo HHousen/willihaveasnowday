@@ -26,3 +26,6 @@ limiter = Limiter(key_func=get_remote_address)
 # Minify responses (only HTML since JS and CSS are handled by brunch)
 from flask_minify import minify
 minifier = minify(html=True, js=False, cssless=False)
+
+from flask_sitemap import Sitemap
+sitemap = Sitemap()

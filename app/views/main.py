@@ -12,7 +12,7 @@ from app.forms import predict as predict_forms
 from app.forms import improve as help_forms
 from app.forms import contact as contact_forms
 from app.toolbox import email
-from app.extensions import db, limiter
+from app.extensions import db, limiter, sitemap
 from app.decorators import *
 
 from sqlalchemy.orm import aliased
@@ -434,3 +434,8 @@ def leaderboard():
 @mainbp.route('/privacy-policy')
 def privacy_policy():
     return render_template('privacy-policy.html', title="Privacy Policy")
+
+@sitemap.register_generator
+def index():
+    for x in ['mainbp.index', 'mainbp.about', 'mainbp.contact', 'mainbp.leaderboard', 'mainbp.privacy_policy', 'userbp.signup', 'userbp.signin', 'userbp.forgot']:
+        yield x, {}

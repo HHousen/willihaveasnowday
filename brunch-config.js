@@ -7,7 +7,7 @@ exports.files = {
             'js/scripts.js': /scripts/,
             'js/index.js': /index/,
             'js/account.js': [/form_functions/, /account/],
-            'js/contact.js': [/form_functions/, /contact/],
+            'js/contact.js': /contact/,
         }
     }
 };

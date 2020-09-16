@@ -8,5 +8,5 @@ class Predict(FlaskForm):
 
     zip_code = TextField(validators=[Required()],
                       description='ZIP Code')
-    num_snowdays = IntegerField(validators=[InputRequired(), NumberRange(min=0, max=42)],
+    num_snowdays = IntegerField(validators=[InputRequired(), NumberRange(min=0, max=11)],
                      description='Snow Days this Year')

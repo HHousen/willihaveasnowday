@@ -26,7 +26,7 @@ from app.prediction_utils import used_features_list
 import pandas as pd
 
 from uszipcode import SearchEngine
-from noaa_sdk.errors import InvalidZipCodeError, RetryTimeoutError
+from noaa_sdk.errors import InvalidZipCodeError, RetryTimeoutError, ServiceUnavilableError
 
 import atexit
 import time
@@ -285,7 +285,9 @@ def predict():
             except InvalidZipCodeError as e:
                 return json.dumps({"zip_code": ["Invalid zip code"]}), 400
             except RetryTimeoutError as e:
-                raise PredictionError("Code 775 NOAA Weather.gov Unavailable") from e
+                raise PredictionError("Code 904 NOAA Weather.gov Timeout") from e
+            except ServiceUnavilableError as e:
+                raise PredictionError("Code 775 NOAA Weather.gov Unavilable") from e
             except Exception as e:
                 raise PredictionError("Code 141 NOAA Weather.gov Processing Error") from e
 

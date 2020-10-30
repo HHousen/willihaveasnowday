@@ -40,8 +40,8 @@ flask-sitemap = "*"
 [requires]
 python_version = "3.8"
 
-[packages.noaa-sdk]
-git = "https://github.com/HHousen/noaa.git"
+[packages.noaa_sdk]
+git = "https://github.com/HHousen/noaa"
 
 [packages.sentry-sdk]
 extras = [ "flask",]

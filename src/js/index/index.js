@@ -256,10 +256,10 @@ $(document).ready(function () {
         }
 
         push_date_to_weekday(today);
-        const tomorrow = new Date();
+        const tomorrow = new Date(today);
         tomorrow.setDate(today.getDate() + 1);
         push_date_to_weekday(tomorrow);
-        const thirdDay = new Date();
+        const thirdDay = new Date(tomorrow);
         thirdDay.setDate(tomorrow.getDate() + 1);
         push_date_to_weekday(thirdDay);
 

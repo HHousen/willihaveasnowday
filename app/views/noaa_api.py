@@ -189,11 +189,11 @@ def create_weekdates(return_weekday_names=True, utc=False, return_offsets=False)
         today = datetime.datetime.now(datetime.timezone.utc)
     else:
         today = datetime.datetime.today()
-    
-    today = today.replace(hour=0, minute=0, second=0, microsecond=0)
-    
+
     if today.hour >= 12:
         today = today + datetime.timedelta(1)
+
+    today = today.replace(hour=0, minute=0, second=0, microsecond=0)
 
     today = push_date_to_weekday(today)
     tomorrow = today + datetime.timedelta(1)

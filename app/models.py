@@ -85,10 +85,10 @@ class PreditionReport(db.Model):
     created_at = db.Column(db.DateTime(), unique=True, nullable=False, default=dt.datetime.now)
     zip_code = db.Column(db.String(5), nullable=False)
     num_snowdays = db.Column(db.Integer(), nullable=False)
-    model_inputs = db.Column(db.String(2000), nullable=False)
+    model_inputs = db.Column(db.String(5000), nullable=False)
     model_prediction = db.Column(db.String(30), nullable=False)
     emailed = db.Column(db.Boolean(), nullable=False, default=False)
-    weather_text = db.Column(db.String(2000), nullable=True)
+    weather_text = db.Column(db.String(5000), nullable=True)
     first_prediction_date = db.Column(db.Date(), nullable=False)
 
     unauth_users_ids = relationship("UnauthUserPredictions", back_populates="report")
@@ -97,7 +97,8 @@ class PreditionReport(db.Model):
     @classmethod
     def get_recent_prediction(cls, zip_code):
         zip_code_entry = cls.query.order_by(PreditionReport.created_at.desc()).filter_by(zip_code=zip_code).first()
-        if zip_code_entry is not None and zip_code_entry.created_at > datetime.datetime.now()-datetime.timedelta(hours=1):
+        date_now = datetime.datetime.now()
+        if zip_code_entry is not None and zip_code_entry.created_at > date_now-datetime.timedelta(hours=1) and zip_code_entry.created_at.day == date_now.day:
             return zip_code_entry
         
         return None

@@ -1,5 +1,6 @@
 import statistics
 import datetime
+import math
 import re
 from collections import OrderedDict
 from noaa_sdk import noaa
@@ -84,6 +85,7 @@ def generate_hourly(weather_data, name, scaling_factor=None):
         time, duration = element["validTime"].split("/")
         # If current element lasts for more than a day then convert days to hours for `duration`
         days_search = re.search(r'P(.*?)D', duration)
+        minutes_search = re.search(r'T(.*?)M', duration)
         if days_search:  # P5DT6H
             days = int(days_search.group(1))
             hours_search = re.search(r'T(.*?)H', duration)
@@ -92,6 +94,9 @@ def generate_hourly(weather_data, name, scaling_factor=None):
             else:
                 hours = 0
             duration = days * 24 + hours
+        elif minutes_search:  # PT52M41S
+            minutes = int(minutes_search.group(1))
+            duration = math.ceil(minutes / 60)
         else:  # PT4H
             duration = int(re.search(r'T(.*?)H', duration).group(1))  # select the number of hours in strings like "PT1H"
         current_datetime = datetime.datetime.fromisoformat(time)
@@ -429,6 +434,18 @@ def prepapre_model_inputs(weather_data, extra_info=None, truncate=True, used_fea
         model_inputs = {key: model_inputs[key] for key in used_features_list if key != "Number of Snowdays in Year"}
     
     return model_inputs
+
+def scale_model_predictions(prediction, pred_min, max_minus_min, apply_shift=False):
+    # Normalization as per https://stats.stackexchange.com/a/70807
+    normalized = (prediction - pred_min) / max_minus_min
+
+    if apply_shift:
+        normalized = 0.7 * (normalized ** 1.5)
+    
+    # Cap values returned at 90%.
+    normalized[normalized > 0.9] = 0.9
+
+    return normalized
 
 # import joblib
 # import sys, os

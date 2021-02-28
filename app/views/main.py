@@ -21,7 +21,7 @@ from sqlalchemy import func
 from sendgrid.helpers.mail import To, Substitution, Personalization, From
 
 from app.views import noaa_api
-from app.prediction_utils import used_features_list
+from app.prediction_utils import used_features_list, pred_min, max_minus_min
 
 import pandas as pd
 
@@ -298,7 +298,7 @@ def predict():
             dates, offsets = noaa_api.create_weekdates(return_weekday_names=False, return_offsets=True)
             first_prediction_date = dates[0]
 
-            model_inputs["Number of Snowdays in Year"] = [form.num_snowdays.data] * len(model_inputs[used_features_list[0]])
+            model_inputs["Number of Snowdays in Year"] = [form.num_snowdays.data] * len(model_inputs[used_features_list[10]])
             # Convert to DataFrame and reorder the columns according to used_features_list
             model_inputs = pd.DataFrame(model_inputs)[used_features_list]
             
@@ -306,6 +306,7 @@ def predict():
             try:
                 prediction_probs = app.model.predict_proba(model_inputs)
                 prediction_probs = prediction_probs[:, 0]
+                prediction_probs = noaa_api.scale_model_predictions(prediction_probs, pred_min, max_minus_min, apply_shift=True)
             except Exception as e:
                 raise PredictionError("Code 436 AI Model Failure") from e
 

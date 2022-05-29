@@ -12,17 +12,9 @@ from app.decorators import already_signed_in
 
 from sendgrid.helpers.mail import From
 
-# Setup Stripe integration
-import stripe
 import json
 from json import dumps
 
-stripe_keys = {
-	'secret_key': "secret_key",
-	'publishable_key': "publishable_key"
-}
-
-stripe.api_key = stripe_keys['secret_key']
 
 @login_manager.user_loader
 def load_user(user_id):

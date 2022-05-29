@@ -34,7 +34,34 @@ npm start
 ## Project Structure
 
 ```
-
+.
+├── app
+│   ├── forms
+│   ├── static
+│   │   ├── css
+│   │   ├── img
+│   │   └── js
+│   ├── templates
+│   │   ├── admin
+│   │   ├── components
+│   │   ├── email
+│   │   └── user
+│   ├── toolbox
+│   ├── uszipcode
+│   └── views
+└── src
+    ├── assets
+    │   └── img
+    ├── js
+    │   ├── account
+    │   ├── contact
+    │   ├── form_functions
+    │   ├── index
+    │   └── scripts
+    └── sass
+        └── materialize
+            └── components
+                └── forms
 ```
 
 ## Deployment

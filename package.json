@@ -7,7 +7,7 @@
     "start": "concurrently -n \"BRUNCH,FLASK\" -c \"green.bold,cyan.bold\" \"npm:brunch-dev\" \"npm:flask-server\"",
     "brunch-dev": "NODE_ENV=debug brunch watch",
     "flask-server": "flask run",
-    "run-production": "gunicorn \"app.app:create_app()\""
+    "run-production": "gunicorn \"app.app:create_app()\" --bind 0.0.0.0:8000"
   },
   "repository": {
     "type": "git",
@@ -27,6 +27,7 @@
     "terser-brunch": "^4.0.0"
   },
   "devDependencies": {
+    "@flydotio/dockerfile": "^0.5.0",
     "brunch": "^3.0.0",
     "concurrently": "^5.3.0"
   }

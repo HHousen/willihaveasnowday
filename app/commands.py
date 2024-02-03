@@ -34,3 +34,9 @@ def recycledb():
         print(colored('The SQL database has been recreated', 'green'))
     else:
         print(colored('Canceled', 'green'))
+
+@click.command()
+def sendemails():
+    from app.views.main import send_follow_up_emails
+    app.create_app()
+    send_follow_up_emails()

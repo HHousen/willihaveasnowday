@@ -70,6 +70,7 @@ def create_follow_up_email_mul_zip(prediction_ids, zip_codes, user, first_predic
         substitutions.append(Substitution('((zip_code_' + str(idx) + '))', zip_code, p))
     
     p = Personalization()
+    assert user.email is not None
     to_object = To(email=user.email, substitutions=substitutions)
     p.add_to(to_object)
 
@@ -78,6 +79,7 @@ def create_follow_up_email_mul_zip(prediction_ids, zip_codes, user, first_predic
 
 def send_follow_up_emails():
     with app.main_app.app_context():
+        app.main_app.logger.info("Sending follow up emails")
         if is_summer:
             return
         ts = URLSafeTimedSerializer(current_app.config['SECRET_KEY'])
@@ -87,13 +89,18 @@ def send_follow_up_emails():
         # yesterday = (dt.datetime.now() - dt.timedelta(1)).replace(hour=12, minute=0, second=0).strftime('%Y-%m-%d %H:%M:%S')
         
         to_emails = []
-        distinct_zip_codes = PreditionReport.query.with_entities(PreditionReport.zip_code).distinct().all()
+        distinct_zip_codes = PreditionReport.query.filter(PreditionReport.first_prediction_date == current_date).with_entities(PreditionReport.zip_code).distinct().all()
         distinct_zip_codes = [x[0] for x in distinct_zip_codes]
+        app.main_app.logger.info(f"Sending emails: Number of distinct zip codes: {len(distinct_zip_codes)}")
 
         user_emails_dict = {}
 
-        for zip_code in distinct_zip_codes:
+        for zip_idx, zip_code in enumerate(distinct_zip_codes):
+            if zip_idx % 100 == 0:
+                app.main_app.logger.info(f"On zip code idx {zip_idx} of {len(distinct_zip_codes)}")
             predictions = PreditionReport.query.filter(PreditionReport.first_prediction_date == current_date, PreditionReport.emailed.is_(False), PreditionReport.zip_code == zip_code).all()
+            if len(predictions) > 0:
+                app.main_app.logger.info(f"{len(predictions)} predictions matched for zip code {zip_code}")
             # predictions = PreditionReport.query.filter(PreditionReport.created_at.between(yesterday, today), PreditionReport.emailed == False, PreditionReport.zip_code == zip_code).all()
 
             # current_date = predictions[0].first_prediction_date
@@ -105,6 +112,8 @@ def send_follow_up_emails():
             predictions_ids_tokenized = ",".join(predictions_ids)
 
             for user in users:
+                if user.email is None:
+                    continue
                 if user.receive_improve_emails:
                     user_email_info = {"predictions_ids_tokenized": predictions_ids_tokenized, "zip_code": zip_code, "extra": "full"}
                     try:
@@ -115,6 +124,8 @@ def send_follow_up_emails():
                 # p = create_follow_up_email(predictions_ids_tokenized, zip_code, user, current_date, ts, extra="full")
                 # to_emails.append(p)
             for unauth_user in unauth_users:
+                if unauth_user.email is None:
+                    continue
                 user_email_info = {"predictions_ids_tokenized": predictions_ids_tokenized, "zip_code": zip_code, "extra": "un"}
                 try:
                     user_emails_dict[unauth_user].append(user_email_info)
@@ -126,6 +137,8 @@ def send_follow_up_emails():
             for prediction in predictions:
                 prediction.emailed = True
                 db.session.commit()
+        
+        app.main_app.logger.info(f"Sending emails: Number of distinct users: {len(user_emails_dict)}")
         
         emails_by_num_zip_codes = {}
         for user, emails in user_emails_dict.items():
@@ -149,6 +162,7 @@ def send_follow_up_emails():
                 html = render_template('email/improve_multiple.html', num_zip_codes=num_zip_codes)
             else:
                 html = render_template('email/improve.html')
+            app.main_app.logger.info(f"Sending num_zip_codes={num_zip_codes}, len(to_emails)={len(to_emails)}")
             email.send(
                 recipient=None,
                 personalizations=to_emails,
@@ -165,8 +179,8 @@ def update_rankings():
         User.query.update({"rank": subq + 1}, synchronize_session=False)
         db.session.commit()
 
-scheduler = BackgroundScheduler()
-scheduler.add_job(func=send_follow_up_emails, trigger="cron", hour=16, minute=0, day_of_week="0-4", jitter=120)
+scheduler = BackgroundScheduler(job_defaults={'misfire_grace_time': 15*60})
+scheduler.add_job(func=send_follow_up_emails, trigger="cron", hour=8, minute=35, day_of_week="1-5", jitter=120)
 scheduler.add_job(func=update_rankings, trigger="cron", hour="*/3", day_of_week="1-5", jitter=120)
 scheduler.start()
 
@@ -379,16 +393,18 @@ def snowday_status(token):
 
     statuses = []
     if user_type == "full":
+        not_none_association = None
         for prediction_id in prediction_ids:
-            association = UserPredictions.query.filter_by(prediction_id=prediction_id, user_id=user_id).first()
+            association = UserPredictions.query.filter_by(prediction_id=int(prediction_id), user_id=user_id).first()
             if association is not None:
                 statuses.append(association.snowday_status)
                 association.snowday_status = response
+                not_none_association = association
         
         all_statuses_are_none = all([x is None for x in statuses])
         if all_statuses_are_none:
             flash("Response recorded successfully and points awarded.")
-            association.user_rel.points += 1
+            not_none_association.user_rel.points += 1
         else:
             flash("Response updated. Points already awarded.")
     

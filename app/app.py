@@ -99,6 +99,7 @@ def register_commands(app):
     app.cli.add_command(commands.initdb)
     app.cli.add_command(commands.dropdb)
     app.cli.add_command(commands.recycledb)
+    app.cli.add_command(commands.sendemails)
 
 def setup_sentry():
     sentry_sdk.init(

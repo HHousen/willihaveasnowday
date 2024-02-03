@@ -43,12 +43,9 @@ def send(recipient, subject, body, from_email=None, sendgrid_only=False, persona
         if personalizations is not None:
             [message.add_personalization(p) for p in personalizations]
         
-        try:
-            sg = SendGridAPIClient(sendgrid_key)
-            response = sg.send(message)
-            return ("success", response)
-        except Exception as e:
-            return ("fail", e)
+        sg = SendGridAPIClient(sendgrid_key)
+        response = sg.send(message)
+        return ("success", response)
     
 
 

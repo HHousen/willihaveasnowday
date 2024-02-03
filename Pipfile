@@ -34,14 +34,11 @@ scikit-learn = "*"
 xgboost = "*"
 cmake = ">=3.18"
 flask-sitemap = "*"
+jsmin = "*"
+noaa_sdk = {git = "https://github.com/HHousen/noaa"}
+sentry-sdk = {extras = [ "flask",]}
 
 [dev-packages]
 
 [requires]
 python_version = "3.8"
-
-[packages.noaa_sdk]
-git = "https://github.com/HHousen/noaa"
-
-[packages.sentry-sdk]
-extras = [ "flask",]
